@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Irregular Verbs Challenge</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="app">
+        <div id="gameScreen" class="screen active">
+            <div class="header">
+                <div class="score">🏆 <span id="score">0</span></div>
+                <div class="lives">❤️ <span id="lives">3</span></div>
+            </div>
+            
+            <div class="game-card">
+                <div class="verb-display">
+                    <span id="currentVerb">begin</span>
+                </div>
+                <div class="translation" id="translation">boshlamoq</div>
+                
+                <div class="question">
+                    <span id="questionText">V2 (Past Simple) shaklini yozing:</span>
+                </div>
+                
+                <div class="input-container">
+                    <input type="text" id="answerInput" placeholder="Javobingizni yozing..." autocomplete="off" autofocus>
+                </div>
+                
+                <button class="btn btn-primary" id="submitBtn">Tekshirish</button>
+                <button class="btn btn-secondary" id="skipBtn">O'tkazib yuborish ➡️</button>
+            </div>
+            
+            <button class="btn btn-outline" id="leaderboardBtn">🏆 Reyting</button>
+        </div>
+        
+        <div id="leaderboardScreen" class="screen">
+            <div class="leaderboard-header">
+                <button class="back-btn" id="backBtn">← Orqaga</button>
+                <h2>🏆 Eng yaxshi o'yinchilar</h2>
+            </div>
+            
+            <div class="leaderboard-tabs">
+                <button class="tab-btn active" data-tab="all">Umumiy</button>
+                <button class="tab-btn" data-tab="today">Bugun</button>
+            </div>
+            
+            <div class="leaderboard-list" id="leaderboardList">
+                <div class="loading">Yuklanmoqda...</div>
+            </div>
+        </div>
+        
+        <div id="gameOverScreen" class="screen">
+            <div class="gameover-card">
+                <div class="gameover-emoji">🎯</div>
+                <h2>O'yin tugadi!</h2>
+                <div class="final-score">
+                    <span>Sizning ballingiz:</span>
+                    <span class="final-score-value" id="finalScore">0</span>
+                </div>
+                <button class="btn btn-primary" id="playAgainBtn">🔄 Qayta o'ynash</button>
+                <button class="btn btn-secondary" id="viewLeaderboardBtn">🏆 Reytingni ko'rish</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
