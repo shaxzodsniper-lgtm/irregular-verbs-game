@@ -1,0 +1,12 @@
+{
+  "name": "irregular-verbs-game",
+  "version": "1.0.0",
+  "description": "Irregular verbs learning game for Telegram",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'Build completed'"
+  },
+  "keywords": ["telegram", "mini-app", "game", "english"],
+  "author": "",
+  "license": "MIT"
+}
