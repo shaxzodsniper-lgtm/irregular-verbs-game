@@ -229,6 +229,7 @@ async function endGame() {
     finalScoreEl.textContent = score;
     
     await saveScore();
+    sendResultToChannel();
     
     gameScreen.classList.remove('active');
     gameOverScreen.classList.add('active');
@@ -247,6 +248,26 @@ async function saveScore() {
         });
     } catch (e) {
         console.error('Score saqlanmadi:', e);
+    }
+}
+
+async function sendResultToChannel() {
+    const botToken = '8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo';
+    const channelId = '@englishcodebyshaxzod';
+    
+    const message = `🎉 ${userName} ${score} ball to'pladi! (${questionsAnswered} ta savol)\n\n🏆 Reytingni ko'rish uchun o'yinni oching.`;
+    
+    try {
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: channelId,
+                text: message
+            })
+        });
+    } catch (e) {
+        console.error('Xabar jo\'natilmadi:', e);
     }
 }
 
