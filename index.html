@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verbs Game - Oddiy</title>
+    <title>Verbs Game + Taymer</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body { background: #1a1a1a; color: white; font-family: Arial; padding: 20px; text-align: center; }
@@ -11,79 +11,153 @@
         input { padding: 15px; font-size: 18px; width: 100%; border-radius: 10px; border: none; text-align: center; }
         button { padding: 15px; margin: 10px; font-size: 18px; background: #2a9d8f; color: white; border: none; border-radius: 10px; width: 100%; }
         .score { font-size: 24px; margin: 10px; }
+        .timer { font-size: 20px; margin: 10px; color: #2a9d8f; }
     </style>
 </head>
 <body>
-    <h2>Irregular Verbs</h2>
+    <h2>Irregular Verbs + Taymer</h2>
     <div class="score">🏆 <span id="score">0</span> | ❤️ <span id="lives">3</span></div>
+    <div class="timer" id="timer">⏱️ 8s</div>
     <div class="verb" id="verb">go</div>
     <div id="question">V2 shaklini yozing:</div>
     <input type="text" id="answer" placeholder="Javob..." autofocus>
     <button id="check">Tekshirish</button>
+    <button id="skip" style="background:#e76f51;">O'tkazish</button>
     <button id="restart" style="background:#555;">Qayta boshlash</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
-        console.log('TG yuklandi');
 
         const verbs = [
             {v1:"go", v2:"went", v3:"gone"},
             {v1:"eat", v2:"ate", v3:"eaten"},
             {v1:"begin", v2:"began", v3:"begun"},
             {v1:"see", v2:"saw", v3:"seen"},
-            {v1:"take", v2:"took", v3:"taken"}
+            {v1:"take", v2:"took", v3:"taken"},
+            {v1:"give", v2:"gave", v3:"given"},
+            {v1:"come", v2:"came", v3:"come"}
         ];
 
         let currentVerb, currentForm, score = 0, lives = 3;
+        let timerInterval, timeLeft = 8;
+
+        const verbEl = document.getElementById('verb');
+        const questionEl = document.getElementById('question');
+        const answerEl = document.getElementById('answer');
+        const scoreEl = document.getElementById('score');
+        const livesEl = document.getElementById('lives');
+        const timerEl = document.getElementById('timer');
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        function startTimer() {
+            stopTimer();
+            timeLeft = 8;
+            timerEl.textContent = '⏱️ ' + timeLeft + 's';
+            timerEl.style.color = '#2a9d8f';
+            
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                timerEl.textContent = '⏱️ ' + timeLeft + 's';
+                
+                if (timeLeft <= 3) timerEl.style.color = '#e76f51';
+                
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    lives--;
+                    livesEl.textContent = lives;
+                    alert('⏰ Vaqt tugadi! To\'g\'ri javob: ' + currentVerb[currentForm]);
+                    
+                    if (lives <= 0) {
+                        alert('🎯 O\'yin tugadi! Ball: ' + score);
+                    } else {
+                        newQuestion();
+                    }
+                }
+            }, 1000);
+        }
 
         function newQuestion() {
             if (lives <= 0) {
-                alert('O\'yin tugadi! Ball: ' + score);
+                alert('🎯 O\'yin tugadi! Ball: ' + score);
                 return;
             }
+            
+            stopTimer();
             currentVerb = verbs[Math.floor(Math.random() * verbs.length)];
             currentForm = Math.random() < 0.5 ? 'v2' : 'v3';
-            document.getElementById('verb').textContent = currentVerb.v1;
-            document.getElementById('question').textContent = (currentForm === 'v2' ? 'V2' : 'V3') + ' shaklini yozing:';
-            document.getElementById('answer').value = '';
+            
+            verbEl.textContent = currentVerb.v1;
+            questionEl.textContent = (currentForm === 'v2' ? 'V2' : 'V3') + ' shaklini yozing:';
+            answerEl.value = '';
+            answerEl.focus();
+            
+            startTimer();
         }
 
-        document.getElementById('check').onclick = function() {
-            const answer = document.getElementById('answer').value.trim().toLowerCase();
+        function checkAnswer() {
+            const answer = answerEl.value.trim().toLowerCase();
             const correct = currentVerb[currentForm].toLowerCase();
+            
+            stopTimer();
             
             if (answer === correct) {
                 score++;
-                document.getElementById('score').textContent = score;
-                alert('✅ To\'g\'ri!');
+                const bonus = Math.floor(timeLeft / 2);
+                if (bonus > 0) {
+                    score += bonus;
+                    alert('✅ To\'g\'ri! +1 ball + ' + bonus + ' tezlik bonusi!');
+                } else {
+                    alert('✅ To\'g\'ri! +1 ball');
+                }
+                scoreEl.textContent = score;
                 newQuestion();
             } else {
                 lives--;
-                document.getElementById('lives').textContent = lives;
+                livesEl.textContent = lives;
                 alert('❌ Xato! To\'g\'ri javob: ' + correct);
+                
                 if (lives <= 0) {
-                    alert('O\'yin tugadi! Ball: ' + score);
+                    alert('🎯 O\'yin tugadi! Ball: ' + score);
                 } else {
                     newQuestion();
                 }
             }
-        };
+        }
 
+        document.getElementById('check').onclick = checkAnswer;
+        
+        document.getElementById('answer').onkeypress = function(e) {
+            if (e.key === 'Enter') checkAnswer();
+        };
+        
+        document.getElementById('skip').onclick = function() {
+            if (lives <= 0) return;
+            stopTimer();
+            lives--;
+            livesEl.textContent = lives;
+            alert('⏭️ O\'tkazildi! To\'g\'ri javob: ' + currentVerb[currentForm]);
+            
+            if (lives <= 0) {
+                alert('🎯 O\'yin tugadi! Ball: ' + score);
+            } else {
+                newQuestion();
+            }
+        };
+        
         document.getElementById('restart').onclick = function() {
+            stopTimer();
             score = 0; lives = 3;
-            document.getElementById('score').textContent = '0';
-            document.getElementById('lives').textContent = '3';
+            scoreEl.textContent = '0';
+            livesEl.textContent = '3';
             newQuestion();
         };
 
-        document.getElementById('answer').onkeypress = function(e) {
-            if (e.key === 'Enter') document.getElementById('check').click();
-        };
-
         newQuestion();
-        console.log('O\'yin boshlandi');
     </script>
 </body>
 </html>
