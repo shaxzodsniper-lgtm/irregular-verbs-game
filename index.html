@@ -2,520 +2,88 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Irregular Verbs Challenge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verbs Game - Oddiy</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        :root {
-            --primary: #2a9d8f;
-            --danger: #e76f51;
-            --gray: #6c757d;
-        }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a1a;
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .app {
-            width: 100%;
-            max-width: 450px;
-            min-height: 100vh;
-            padding: 16px;
-        }
-        .screen {
-            display: none;
-            width: 100%;
-        }
-        .screen.active {
-            display: block;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0 20px;
-        }
-        .score, .lives {
-            font-size: 20px;
-            font-weight: 600;
-            padding: 8px 16px;
-            background: #2a2a2a;
-            border-radius: 50px;
-        }
-        .lives { color: var(--danger); }
-        .game-card {
-            background: #2a2a2a;
-            border-radius: 20px;
-            padding: 30px 20px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .verb-display {
-            font-size: 60px;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 5px;
-            text-transform: capitalize;
-        }
-        .translation {
-            font-size: 18px;
-            color: #aaa;
-            margin-bottom: 20px;
-        }
-        .timer-container { margin-bottom: 15px; }
-        .timer-bar {
-            width: 100%;
-            height: 6px;
-            background: #444;
-            border-radius: 50px;
-            overflow: hidden;
-            margin-bottom: 5px;
-        }
-        .timer-progress {
-            height: 100%;
-            width: 100%;
-            background: var(--primary);
-            border-radius: 50px;
-            transition: width 1s linear;
-        }
-        .timer-text { text-align: center; font-size: 14px; color: var(--primary); }
-        .question { font-size: 18px; margin-bottom: 15px; }
-        .input-container { margin-bottom: 15px; }
-        #answerInput {
-            width: 100%;
-            padding: 16px;
-            font-size: 18px;
-            border: 2px solid #444;
-            border-radius: 50px;
-            background: #1a1a1a;
-            color: white;
-            text-align: center;
-            outline: none;
-        }
-        #answerInput:focus { border-color: var(--primary); }
-        .btn {
-            width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            margin-bottom: 10px;
-        }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-secondary { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-        .btn-outline { background: transparent; color: var(--gray); border: 2px solid var(--gray); }
-        .leaderboard-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .back-btn {
-            background: #2a2a2a;
-            border: none;
-            padding: 10px 16px;
-            border-radius: 50px;
-            color: white;
-            cursor: pointer;
-        }
-        .leaderboard-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: #2a2a2a;
-            border-radius: 50px;
-            color: white;
-            cursor: pointer;
-        }
-        .tab-btn.active { background: var(--primary); }
-        .leaderboard-list {
-            background: #2a2a2a;
-            border-radius: 20px;
-            padding: 10px;
-        }
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 12px;
-            margin-bottom: 8px;
-        }
-        .leaderboard-rank {
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--primary);
-            border-radius: 50%;
-            margin-right: 15px;
-        }
-        .leaderboard-rank.top-1 { background: #ffd700; color: #1a1a1a; }
-        .leaderboard-rank.top-2 { background: #c0c0c0; color: #1a1a1a; }
-        .leaderboard-rank.top-3 { background: #cd7f32; }
-        .leaderboard-info { flex: 1; }
-        .leaderboard-name { font-weight: 600; }
-        .leaderboard-stats { font-size: 12px; color: #aaa; }
-        .leaderboard-score { color: var(--primary); font-weight: 600; }
-        .gameover-card {
-            text-align: center;
-            padding: 40px 20px;
-            background: #2a2a2a;
-            border-radius: 20px;
-        }
-        .gameover-emoji { font-size: 64px; margin-bottom: 20px; }
-        .gameover-card h2 { margin-bottom: 20px; }
-        .final-score { margin-bottom: 30px; }
-        .final-score-value {
-            font-size: 48px;
-            font-weight: 700;
-            color: var(--primary);
-            display: block;
-        }
-        .loading { text-align: center; padding: 40px; color: #aaa; }
-        .notification {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 24px;
-            border-radius: 50px;
-            color: white;
-            z-index: 1000;
-        }
-        .notification.success { background: var(--primary); }
-        .notification.error { background: var(--danger); }
+        body { background: #1a1a1a; color: white; font-family: Arial; padding: 20px; text-align: center; }
+        .verb { font-size: 60px; color: #2a9d8f; margin: 30px 0; }
+        input { padding: 15px; font-size: 18px; width: 100%; border-radius: 10px; border: none; text-align: center; }
+        button { padding: 15px; margin: 10px; font-size: 18px; background: #2a9d8f; color: white; border: none; border-radius: 10px; width: 100%; }
+        .score { font-size: 24px; margin: 10px; }
     </style>
 </head>
 <body>
-    <div class="app">
-        <div id="gameScreen" class="screen active">
-            <div class="header">
-                <div class="score">🏆 <span id="score">0</span></div>
-                <div class="lives">❤️ <span id="lives">3</span></div>
-            </div>
-            <div class="game-card">
-                <div class="verb-display"><span id="currentVerb">begin</span></div>
-                <div class="translation" id="translation">boshlamoq</div>
-                <div class="timer-container" id="timerContainer">
-                    <div class="timer-bar"><div class="timer-progress" id="timerProgress"></div></div>
-                    <div class="timer-text" id="timerText">8s</div>
-                </div>
-                <div class="question"><span id="questionText">V2 shaklini yozing:</span></div>
-                <div class="input-container">
-                    <input type="text" id="answerInput" placeholder="Javob..." autocomplete="off" autofocus>
-                </div>
-                <button class="btn btn-primary" id="submitBtn">✅ Tekshirish</button>
-                <button class="btn btn-secondary" id="skipBtn">⏭️ O'tkazish</button>
-            </div>
-            <button class="btn btn-outline" id="leaderboardBtn">🏆 Reyting</button>
-        </div>
-        
-        <div id="leaderboardScreen" class="screen">
-            <div class="leaderboard-header">
-                <button class="back-btn" id="backBtn">← Orqaga</button>
-                <h2>🏆 Reyting</h2>
-            </div>
-            <div class="leaderboard-tabs">
-                <button class="tab-btn active" data-tab="all">Umumiy</button>
-                <button class="tab-btn" data-tab="today">Bugun</button>
-            </div>
-            <div class="leaderboard-list" id="leaderboardList">
-                <div class="loading">Yuklanmoqda...</div>
-            </div>
-        </div>
-        
-        <div id="gameOverScreen" class="screen">
-            <div class="gameover-card">
-                <div class="gameover-emoji">🎯</div>
-                <h2>O'yin tugadi!</h2>
-                <div class="final-score">
-                    <span>Ballingiz:</span>
-                    <span class="final-score-value" id="finalScore">0</span>
-                </div>
-                <button class="btn btn-primary" id="playAgainBtn">🔄 Qayta o'ynash</button>
-                <button class="btn btn-secondary" id="viewLeaderboardBtn">🏆 Reyting</button>
-            </div>
-        </div>
-    </div>
+    <h2>Irregular Verbs</h2>
+    <div class="score">🏆 <span id="score">0</span> | ❤️ <span id="lives">3</span></div>
+    <div class="verb" id="verb">go</div>
+    <div id="question">V2 shaklini yozing:</div>
+    <input type="text" id="answer" placeholder="Javob..." autofocus>
+    <button id="check">Tekshirish</button>
+    <button id="restart" style="background:#555;">Qayta boshlash</button>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.ready();
-
-        const SUPABASE_URL = 'https://vkliiyqxjuhxaafrnyrb.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrbGlpeXF4anVoeGFhZnJueXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzkyODYsImV4cCI6MjA5MTcxNTI4Nn0.Jn6xSg8GryDygzB3Y_y99zd1hGJ7ekXZVeNY312GJb8';
-        
-        let supabase;
-        try { supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
+        console.log('TG yuklandi');
 
         const verbs = [
-            {v1:"be",v2:"was/were",v3:"been",trans:"bo'lmoq"},
-            {v1:"become",v2:"became",v3:"become",trans:"bo'lmoq, aylanmoq"},
-            {v1:"begin",v2:"began",v3:"begun",trans:"boshlamoq"},
-            {v1:"bite",v2:"bit",v3:"bitten",trans:"tishlamoq"},
-            {v1:"blow",v2:"blew",v3:"blown",trans:"puflamoq"},
-            {v1:"break",v2:"broke",v3:"broken",trans:"sindirmoq"},
-            {v1:"bring",v2:"brought",v3:"brought",trans:"olib kelmoq"},
-            {v1:"build",v2:"built",v3:"built",trans:"qurmoq"},
-            {v1:"buy",v2:"bought",v3:"bought",trans:"sotib olmoq"},
-            {v1:"catch",v2:"caught",v3:"caught",trans:"tutmoq"},
-            {v1:"choose",v2:"chose",v3:"chosen",trans:"tanlamoq"},
-            {v1:"come",v2:"came",v3:"come",trans:"kelmoq"},
-            {v1:"cost",v2:"cost",v3:"cost",trans:"narxda turmoq"},
-            {v1:"cut",v2:"cut",v3:"cut",trans:"kesmoq"},
-            {v1:"do",v2:"did",v3:"done",trans:"bajarmoq"},
-            {v1:"draw",v2:"drew",v3:"drawn",trans:"chizmoq"},
-            {v1:"drink",v2:"drank",v3:"drunk",trans:"ichmoq"},
-            {v1:"drive",v2:"drove",v3:"driven",trans:"haydamoq"},
-            {v1:"eat",v2:"ate",v3:"eaten",trans:"yemoq"},
-            {v1:"fall",v2:"fell",v3:"fallen",trans:"yiqilmoq"},
-            {v1:"feel",v2:"felt",v3:"felt",trans:"his qilmoq"},
-            {v1:"find",v2:"found",v3:"found",trans:"topmoq"},
-            {v1:"fly",v2:"flew",v3:"flown",trans:"uchmoq"},
-            {v1:"forget",v2:"forgot",v3:"forgotten",trans:"unutmoq"},
-            {v1:"get",v2:"got",v3:"got",trans:"olmoq"},
-            {v1:"give",v2:"gave",v3:"given",trans:"bermoq"},
-            {v1:"go",v2:"went",v3:"gone",trans:"bormoq"},
-            {v1:"grow",v2:"grew",v3:"grown",trans:"o'smoq"},
-            {v1:"have",v2:"had",v3:"had",trans:"bor bo'lmoq"},
-            {v1:"hear",v2:"heard",v3:"heard",trans:"eshitmoq"},
-            {v1:"hide",v2:"hid",v3:"hidden",trans:"yashirmoq"},
-            {v1:"hit",v2:"hit",v3:"hit",trans:"urmoq"},
-            {v1:"hold",v2:"held",v3:"held",trans:"tutmoq"},
-            {v1:"hurt",v2:"hurt",v3:"hurt",trans:"og'rimoq"},
-            {v1:"keep",v2:"kept",v3:"kept",trans:"saqlamoq"},
-            {v1:"know",v2:"knew",v3:"known",trans:"bilmoq"},
-            {v1:"leave",v2:"left",v3:"left",trans:"tark etmoq"},
-            {v1:"lend",v2:"lent",v3:"lent",trans:"qarz bermoq"},
-            {v1:"let",v2:"let",v3:"let",trans:"ruxsat bermoq"},
-            {v1:"lose",v2:"lost",v3:"lost",trans:"yo'qotmoq"},
-            {v1:"make",v2:"made",v3:"made",trans:"qilmoq"},
-            {v1:"mean",v2:"meant",v3:"meant",trans:"ma'no bildirmoq"},
-            {v1:"meet",v2:"met",v3:"met",trans:"uchrashmoq"},
-            {v1:"pay",v2:"paid",v3:"paid",trans:"to'lamoq"},
-            {v1:"put",v2:"put",v3:"put",trans:"qo'ymoq"},
-            {v1:"read",v2:"read",v3:"read",trans:"o'qimoq"},
-            {v1:"ride",v2:"rode",v3:"ridden",trans:"minmoq"},
-            {v1:"ring",v2:"rang",v3:"rung",trans:"jiringlamoq"},
-            {v1:"run",v2:"ran",v3:"run",trans:"yugurmoq"},
-            {v1:"say",v2:"said",v3:"said",trans:"aytmoq"},
-            {v1:"see",v2:"saw",v3:"seen",trans:"ko'rmoq"},
-            {v1:"sell",v2:"sold",v3:"sold",trans:"sotmoq"},
-            {v1:"send",v2:"sent",v3:"sent",trans:"jo'natmoq"},
-            {v1:"shine",v2:"shone",v3:"shone",trans:"charaqlamoq"},
-            {v1:"show",v2:"showed",v3:"shown",trans:"ko'rsatmoq"},
-            {v1:"shut",v2:"shut",v3:"shut",trans:"yopmoq"},
-            {v1:"sing",v2:"sang",v3:"sung",trans:"kuylamoq"},
-            {v1:"sit",v2:"sat",v3:"sat",trans:"o'tirmoq"},
-            {v1:"sleep",v2:"slept",v3:"slept",trans:"uxlamoq"},
-            {v1:"speak",v2:"spoke",v3:"spoken",trans:"gapirmoq"},
-            {v1:"spend",v2:"spent",v3:"spent",trans:"sarflamoq"},
-            {v1:"stand",v2:"stood",v3:"stood",trans:"turmoq"},
-            {v1:"swim",v2:"swam",v3:"swum",trans:"suzmoq"},
-            {v1:"take",v2:"took",v3:"taken",trans:"olmoq"},
-            {v1:"teach",v2:"taught",v3:"taught",trans:"o'rgatmoq"},
-            {v1:"tell",v2:"told",v3:"told",trans:"aytmoq"},
-            {v1:"think",v2:"thought",v3:"thought",trans:"o'ylamoq"},
-            {v1:"throw",v2:"threw",v3:"thrown",trans:"uloqtirmoq"},
-            {v1:"understand",v2:"understood",v3:"understood",trans:"tushunmoq"},
-            {v1:"wake",v2:"woke",v3:"woken",trans:"uyqudan turmoq"},
-            {v1:"wear",v2:"wore",v3:"worn",trans:"kiymoq"},
-            {v1:"win",v2:"won",v3:"won",trans:"yutmoq"},
-            {v1:"write",v2:"wrote",v3:"written",trans:"yozmoq"}
+            {v1:"go", v2:"went", v3:"gone"},
+            {v1:"eat", v2:"ate", v3:"eaten"},
+            {v1:"begin", v2:"began", v3:"begun"},
+            {v1:"see", v2:"saw", v3:"seen"},
+            {v1:"take", v2:"took", v3:"taken"}
         ];
 
-        let usedVerbs = new Set(), currentVerb, currentForm, score = 0, lives = 3, gameActive = true;
-        let userId = null, userName = 'O\'yinchi', timerInterval, timeLeft = 8, questionsAnswered = 0;
-
-        const gameScreen = document.getElementById('gameScreen');
-        const leaderboardScreen = document.getElementById('leaderboardScreen');
-        const gameOverScreen = document.getElementById('gameOverScreen');
-        const currentVerbEl = document.getElementById('currentVerb');
-        const translationEl = document.getElementById('translation');
-        const questionTextEl = document.getElementById('questionText');
-        const answerInput = document.getElementById('answerInput');
-        const scoreEl = document.getElementById('score');
-        const livesEl = document.getElementById('lives');
-        const finalScoreEl = document.getElementById('finalScore');
-        const timerText = document.getElementById('timerText');
-        const timerProgress = document.getElementById('timerProgress');
-
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            const user = tg.initDataUnsafe.user;
-            userId = user.id;
-            userName = user.first_name || 'O\'yinchi';
-            if (user.last_name) userName += ' ' + user.last_name;
-        } else { userId = 'guest_' + Date.now(); }
-
-        function startTimer() {
-            stopTimer();
-            timeLeft = 8;
-            timerText.textContent = timeLeft + 's';
-            timerProgress.style.width = '100%';
-            timerProgress.style.background = '#2a9d8f';
-            timerInterval = setInterval(function() {
-                timeLeft--;
-                timerText.textContent = timeLeft + 's';
-                timerProgress.style.width = (timeLeft / 8 * 100) + '%';
-                if (timeLeft <= 3) {
-                    timerText.style.color = '#e76f51';
-                    timerProgress.style.background = '#e76f51';
-                }
-                if (timeLeft <= 0) {
-                    stopTimer();
-                    if (gameActive) {
-                        lives--;
-                        livesEl.textContent = lives;
-                        showNotification('⏰ Vaqt tugadi! -1 hayot', 'error');
-                        showNotification('To\'g\'ri javob: ' + currentVerb[currentForm], 'error', 3000);
-                        if (lives <= 0) endGame(); else newQuestion();
-                    }
-                }
-            }, 1000);
-        }
-
-        function stopTimer() { if (timerInterval) clearInterval(timerInterval); }
-
-        function showNotification(text, type, duration = 2000) {
-            const n = document.createElement('div');
-            n.className = 'notification ' + type;
-            n.textContent = text;
-            document.body.appendChild(n);
-            setTimeout(function() { n.remove(); }, duration);
-        }
+        let currentVerb, currentForm, score = 0, lives = 3;
 
         function newQuestion() {
-            if (!gameActive) return;
-            if (usedVerbs.size >= verbs.length) usedVerbs.clear();
-            const available = verbs.filter(function(_, i) { return !usedVerbs.has(i); });
-            currentVerb = available[Math.floor(Math.random() * available.length)];
-            usedVerbs.add(verbs.findIndex(function(v) { return v.v1 === currentVerb.v1; }));
+            if (lives <= 0) {
+                alert('O\'yin tugadi! Ball: ' + score);
+                return;
+            }
+            currentVerb = verbs[Math.floor(Math.random() * verbs.length)];
             currentForm = Math.random() < 0.5 ? 'v2' : 'v3';
-            currentVerbEl.textContent = currentVerb.v1;
-            translationEl.textContent = currentVerb.trans;
-            questionTextEl.textContent = (currentForm === 'v2' ? 'V2 (Past Simple)' : 'V3 (Past Participle)') + ' shaklini yozing:';
-            answerInput.value = '';
-            answerInput.focus();
-            questionsAnswered++;
-            startTimer();
+            document.getElementById('verb').textContent = currentVerb.v1;
+            document.getElementById('question').textContent = (currentForm === 'v2' ? 'V2' : 'V3') + ' shaklini yozing:';
+            document.getElementById('answer').value = '';
         }
 
-        function checkAnswer() {
-            if (!gameActive || !currentVerb) return;
-            stopTimer();
-            const answer = answerInput.value.trim().toLowerCase();
-            const correct = currentVerb[currentForm].toLowerCase().split('/');
-            const isCorrect = correct.some(function(a) { return answer === a.trim(); });
+        document.getElementById('check').onclick = function() {
+            const answer = document.getElementById('answer').value.trim().toLowerCase();
+            const correct = currentVerb[currentForm].toLowerCase();
             
-            if (isCorrect) {
+            if (answer === correct) {
                 score++;
-                const bonus = Math.floor(timeLeft / 2);
-                if (bonus > 0) { score += bonus; scoreEl.textContent = score; }
-                else scoreEl.textContent = score;
-                showNotification('✅ To\'g\'ri! +' + (1 + (bonus > 0 ? bonus : 0)) + ' ball', 'success');
+                document.getElementById('score').textContent = score;
+                alert('✅ To\'g\'ri!');
                 newQuestion();
             } else {
                 lives--;
-                livesEl.textContent = lives;
-                showNotification('❌ Xato! To\'g\'ri javob: ' + currentVerb[currentForm], 'error');
-                if (lives <= 0) endGame(); else newQuestion();
+                document.getElementById('lives').textContent = lives;
+                alert('❌ Xato! To\'g\'ri javob: ' + correct);
+                if (lives <= 0) {
+                    alert('O\'yin tugadi! Ball: ' + score);
+                } else {
+                    newQuestion();
+                }
             }
-        }
-
-        function endGame() {
-            stopTimer();
-            gameActive = false;
-            finalScoreEl.textContent = score;
-            gameScreen.classList.remove('active');
-            gameOverScreen.classList.add('active');
-            if (supabase) {
-                supabase.from('leaderboard').insert({
-                    user_id: userId.toString(), user_name: userName, score: score,
-                    questions_answered: questionsAnswered, created_at: new Date().toISOString()
-                }).then(function() {});
-            }
-            fetch('https://api.telegram.org/bot8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo/sendMessage', {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({chat_id: '@englishcodebyshaxzod', text: '🎉 ' + userName + ' ' + score + ' ball to\'pladi! (' + questionsAnswered + ' ta savol)'})
-            }).catch(function() {});
-        }
-
-        async function loadLeaderboard(tab) {
-            const list = document.getElementById('leaderboardList');
-            list.innerHTML = '<div class="loading">Yuklanmoqda...</div>';
-            if (!supabase) { list.innerHTML = '<div class="loading">Ulanish yo\'q</div>'; return; }
-            let query = supabase.from('leaderboard').select('user_name, score, questions_answered').order('score', { ascending: false }).limit(50);
-            if (tab === 'today') query = query.gte('created_at', new Date().toISOString().split('T')[0]);
-            const { data, error } = await query;
-            if (error || !data.length) { list.innerHTML = '<div class="loading">Hali o\'yinchi yo\'q</div>'; return; }
-            list.innerHTML = data.map(function(item, i) {
-                return '<div class="leaderboard-item"><div class="leaderboard-rank' + (i < 3 ? ' top-' + (i + 1) : '') + '">' + (i + 1) + '</div><div class="leaderboard-info"><div class="leaderboard-name">' + (item.user_name || 'Anonim') + '</div><div class="leaderboard-stats">' + (item.questions_answered || 0) + ' ta savol</div></div><div class="leaderboard-score">' + item.score + ' ball</div></div>';
-            }).join('');
-        }
-
-        document.getElementById('submitBtn').onclick = checkAnswer;
-        document.getElementById('answerInput').onkeypress = function(e) { if (e.key === 'Enter') checkAnswer(); };
-        document.getElementById('skipBtn').onclick = function() {
-            if (!gameActive) return;
-            stopTimer();
-            lives--;
-            livesEl.textContent = lives;
-            showNotification('⏭️ O\'tkazildi. -1 hayot', 'error');
-            showNotification('To\'g\'ri javob: ' + currentVerb[currentForm], 'error', 3000);
-            if (lives <= 0) endGame(); else newQuestion();
         };
-        document.getElementById('leaderboardBtn').onclick = function() {
-            stopTimer();
-            gameScreen.classList.remove('active');
-            leaderboardScreen.classList.add('active');
-            loadLeaderboard('all');
-        };
-        document.getElementById('backBtn').onclick = function() {
-            leaderboardScreen.classList.remove('active');
-            if (gameActive) { gameScreen.classList.add('active'); startTimer(); }
-            else gameOverScreen.classList.add('active');
-        };
-        document.getElementById('playAgainBtn').onclick = function() {
-            stopTimer();
-            score = 0; lives = 3; gameActive = true; usedVerbs.clear(); questionsAnswered = 0;
-            scoreEl.textContent = '0'; livesEl.textContent = '3';
-            gameOverScreen.classList.remove('active');
-            gameScreen.classList.add('active');
+
+        document.getElementById('restart').onclick = function() {
+            score = 0; lives = 3;
+            document.getElementById('score').textContent = '0';
+            document.getElementById('lives').textContent = '3';
             newQuestion();
         };
-        document.getElementById('viewLeaderboardBtn').onclick = function() {
-            gameOverScreen.classList.remove('active');
-            leaderboardScreen.classList.add('active');
-            loadLeaderboard('all');
+
+        document.getElementById('answer').onkeypress = function(e) {
+            if (e.key === 'Enter') document.getElementById('check').click();
         };
-        document.querySelectorAll('.tab-btn').forEach(function(b) {
-            b.onclick = function() {
-                document.querySelectorAll('.tab-btn').forEach(function(x) { x.classList.remove('active'); });
-                b.classList.add('active');
-                loadLeaderboard(b.dataset.tab);
-            };
-        });
 
         newQuestion();
+        console.log('O\'yin boshlandi');
     </script>
 </body>
 </html>
