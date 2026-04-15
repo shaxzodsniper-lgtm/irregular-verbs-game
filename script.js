@@ -46,12 +46,7 @@ function createTimerBar() {
     const timerContainer = document.createElement('div');
     timerContainer.id = 'timerContainer';
     timerContainer.className = 'timer-container';
-    timerContainer.innerHTML = `
-        <div class="timer-bar">
-            <div class="timer-progress" id="timerProgress"></div>
-        </div>
-        <div class="timer-text" id="timerText">8s</div>
-    `;
+    timerContainer.innerHTML = '<div class="timer-bar"><div class="timer-progress" id="timerProgress"></div></div><div class="timer-text" id="timerText">8s</div>';
     
     const questionDiv = document.querySelector('.question');
     questionDiv.parentNode.insertBefore(timerContainer, questionDiv);
@@ -62,7 +57,7 @@ function startTimer() {
     timeLeft = 8;
     updateTimerDisplay();
     
-    timerInterval = setInterval(() => {
+    timerInterval = setInterval(function() {
         timeLeft--;
         updateTimerDisplay();
         
@@ -80,16 +75,14 @@ function updateTimerDisplay() {
     const timerProgress = document.getElementById('timerProgress');
     
     if (timerText) {
-        timerText.textContent = `${timeLeft}s`;
+        timerText.textContent = timeLeft + 's';
         timerText.style.color = timeLeft <= 3 ? '#e76f51' : '#2a9d8f';
     }
     
     if (timerProgress) {
         const percentage = (timeLeft / 8) * 100;
-        timerProgress.style.width = `${percentage}%`;
-        timerProgress.style.background = timeLeft <= 3 
-            ? 'linear-gradient(90deg, #e76f51, #f4a261)' 
-            : 'linear-gradient(90deg, #2a9d8f, #52b788)';
+        timerProgress.style.width = percentage + '%';
+        timerProgress.style.background = timeLeft <= 3 ? 'linear-gradient(90deg, #e76f51, #f4a261)' : 'linear-gradient(90deg, #2a9d8f, #52b788)';
     }
 }
 
@@ -105,10 +98,10 @@ function handleTimeout() {
     
     lives--;
     livesEl.textContent = lives;
-    showNotification(`⏰ Vaqt tugadi! -1 hayot`, 'error');
+    showNotification('⏰ Vaqt tugadi! -1 hayot', 'error');
     
     const correctAnswer = currentVerb[currentForm];
-    showNotification(`To'g'ri javob: ${correctAnswer}`, 'error', 3000);
+    showNotification('To\'g\'ri javob: ' + correctAnswer, 'error', 3000);
     
     if (lives <= 0) {
         endGame();
@@ -154,10 +147,10 @@ function getRandomVerb() {
         usedVerbs.clear();
     }
     
-    const availableVerbs = verbs.filter((_, index) => !usedVerbs.has(index));
+    const availableVerbs = verbs.filter(function(_, index) { return !usedVerbs.has(index); });
     const randomIndex = Math.floor(Math.random() * availableVerbs.length);
     const selectedVerb = availableVerbs[randomIndex];
-    const originalIndex = verbs.findIndex(v => v.v1 === selectedVerb.v1);
+    const originalIndex = verbs.findIndex(function(v) { return v.v1 === selectedVerb.v1; });
     usedVerbs.add(originalIndex);
     
     return selectedVerb;
@@ -173,7 +166,7 @@ function loadNewQuestion() {
     translationEl.textContent = currentVerb.translation;
     
     const formText = currentForm === 'v2' ? 'V2 (Past Simple)' : 'V3 (Past Participle)';
-    questionTextEl.textContent = `${formText} shaklini yozing:`;
+    questionTextEl.textContent = formText + ' shaklini yozing:';
     
     answerInput.value = '';
     answerInput.focus();
@@ -190,7 +183,7 @@ function checkAnswer() {
     const userAnswer = answerInput.value.trim().toLowerCase();
     const correctAnswers = currentVerb[currentForm].toLowerCase().split('/');
     
-    const isCorrect = correctAnswers.some(ans => {
+    const isCorrect = correctAnswers.some(function(ans) {
         return userAnswer === ans.trim();
     });
     
@@ -202,9 +195,9 @@ function checkAnswer() {
         if (speedBonus > 0) {
             score += speedBonus;
             scoreEl.textContent = score;
-            showNotification(`✅ To'g'ri! +1 ball + ${speedBonus} tezlik bonusi!`, 'success');
+            showNotification('✅ To\'g\'ri! +1 ball + ' + speedBonus + ' tezlik bonusi!', 'success');
         } else {
-            showNotification(`✅ To'g'ri! +1 ball`, 'success');
+            showNotification('✅ To\'g\'ri! +1 ball', 'success');
         }
         
         loadNewQuestion();
@@ -213,7 +206,7 @@ function checkAnswer() {
         livesEl.textContent = lives;
         
         const correctAnswer = currentVerb[currentForm];
-        showNotification(`❌ Xato! To'g'ri javob: ${correctAnswer}`, 'error');
+        showNotification('❌ Xato! To\'g\'ri javob: ' + correctAnswer, 'error');
         
         if (lives <= 0) {
             endGame();
@@ -255,10 +248,10 @@ async function sendResultToChannel() {
     const botToken = '8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo';
     const channelId = '@englishcodebyshaxzod';
     
-    const message = `🎉 ${userName} ${score} ball to'pladi! (${questionsAnswered} ta savol)\n\n🏆 Reytingni ko'rish uchun o'yinni oching.`;
+    const message = '🎉 ' + userName + ' ' + score + ' ball to\'pladi! (' + questionsAnswered + ' ta savol)\n\n🏆 Reytingni ko\'rish uchun o\'yinni oching.';
     
     try {
-        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        await fetch('https://api.telegram.org/bot' + botToken + '/sendMessage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -273,11 +266,11 @@ async function sendResultToChannel() {
 
 function showNotification(text, type, duration = 2000) {
     const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
+    notification.className = 'notification ' + type;
     notification.textContent = text;
     document.body.appendChild(notification);
     
-    setTimeout(() => notification.remove(), duration);
+    setTimeout(function() { notification.remove(); }, duration);
 }
 
 async function loadLeaderboard(tab = 'all') {
@@ -310,16 +303,19 @@ async function loadLeaderboard(tab = 'all') {
             return;
         }
         
-        listEl.innerHTML = data.map((item, index) => `
-            <div class="leaderboard-item">
-                <div class="leaderboard-rank ${index < 3 ? `top-${index + 1}` : ''}">${index + 1}</div>
-                <div class="leaderboard-info">
-                    <div class="leaderboard-name">${item.user_name || 'Anonim'}</div>
-                    <div class="leaderboard-stats">${item.questions_answered || 0} ta savol</div>
-                </div>
-                <div class="leaderboard-score">${item.score} ball</div>
-            </div>
-        `).join('');
+        let html = '';
+        data.forEach(function(item, index) {
+            const rankClass = index < 3 ? ' top-' + (index + 1) : '';
+            html += '<div class="leaderboard-item">' +
+                '<div class="leaderboard-rank' + rankClass + '">' + (index + 1) + '</div>' +
+                '<div class="leaderboard-info">' +
+                    '<div class="leaderboard-name">' + (item.user_name || 'Anonim') + '</div>' +
+                    '<div class="leaderboard-stats">' + (item.questions_answered || 0) + ' ta savol</div>' +
+                '</div>' +
+                '<div class="leaderboard-score">' + item.score + ' ball</div>' +
+            '</div>';
+        });
+        listEl.innerHTML = html;
         
     } catch (e) {
         console.error('Leaderboard yuklanmadi:', e);
@@ -330,19 +326,19 @@ async function loadLeaderboard(tab = 'all') {
 function setupEventListeners() {
     submitBtn.addEventListener('click', checkAnswer);
     
-    answerInput.addEventListener('keypress', (e) => {
+    answerInput.addEventListener('keypress', function(e) {
         if (e.key === 'Enter') checkAnswer();
     });
     
-    skipBtn.addEventListener('click', () => {
+    skipBtn.addEventListener('click', function() {
         if (gameActive) {
             stopTimer();
             lives--;
             livesEl.textContent = lives;
-            showNotification(`⏭️ O'tkazildi. -1 hayot`, 'error');
+            showNotification('⏭️ O\'tkazildi. -1 hayot', 'error');
             
             const correctAnswer = currentVerb[currentForm];
-            showNotification(`To'g'ri javob: ${correctAnswer}`, 'error', 3000);
+            showNotification('To\'g\'ri javob: ' + correctAnswer, 'error', 3000);
             
             if (lives <= 0) {
                 endGame();
@@ -352,14 +348,14 @@ function setupEventListeners() {
         }
     });
     
-    document.getElementById('leaderboardBtn').addEventListener('click', () => {
+    document.getElementById('leaderboardBtn').addEventListener('click', function() {
         stopTimer();
         gameScreen.classList.remove('active');
         leaderboardScreen.classList.add('active');
         loadLeaderboard('all');
     });
     
-    document.getElementById('backBtn').addEventListener('click', () => {
+    document.getElementById('backBtn').addEventListener('click', function() {
         leaderboardScreen.classList.remove('active');
         if (gameActive) {
             gameScreen.classList.add('active');
@@ -371,15 +367,15 @@ function setupEventListeners() {
     
     document.getElementById('playAgainBtn').addEventListener('click', resetGame);
     
-    document.getElementById('viewLeaderboardBtn').addEventListener('click', () => {
+    document.getElementById('viewLeaderboardBtn').addEventListener('click', function() {
         gameOverScreen.classList.remove('active');
         leaderboardScreen.classList.add('active');
         loadLeaderboard('all');
     });
     
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
             btn.classList.add('active');
             loadLeaderboard(btn.dataset.tab);
         });
