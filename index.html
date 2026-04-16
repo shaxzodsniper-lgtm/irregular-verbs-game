@@ -90,7 +90,7 @@ const BOT_TOKEN = "8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo";
 const CHANNEL_ID = "@englishcodebyshaxzod";
 const GAME_URL = "https://irregular-verbs-game-alpha.vercel.app"; // <-- O'Z URL'INGIZNI QO'YING
 
-/* ========== FE'LLAR ========== */
+/* ========== FE'LLAR (78 ta) ========== */
 const verbsList = [
 {v1:"be",v2:"was/were",v3:"been",t:"bo'lmoq"},{v1:"become",v2:"became",v3:"become",t:"bo'lmoq, aylanmoq"},{v1:"begin",v2:"began",v3:"begun",t:"boshlamoq"},{v1:"bite",v2:"bit",v3:"bitten",t:"tishlamoq"},{v1:"blow",v2:"blew",v3:"blown",t:"puflamoq"},{v1:"break",v2:"broke",v3:"broken",t:"sindirmoq"},{v1:"bring",v2:"brought",v3:"brought",t:"olib kelmoq"},{v1:"build",v2:"built",v3:"built",t:"qurmoq"},{v1:"buy",v2:"bought",v3:"bought",t:"sotib olmoq"},{v1:"catch",v2:"caught",v3:"caught",t:"tutmoq"},{v1:"choose",v2:"chose",v3:"chosen",t:"tanlamoq"},{v1:"come",v2:"came",v3:"come",t:"kelmoq"},{v1:"cost",v2:"cost",v3:"cost",t:"narxda turmoq"},{v1:"cut",v2:"cut",v3:"cut",t:"kesmoq"},{v1:"do",v2:"did",v3:"done",t:"bajarmoq"},{v1:"draw",v2:"drew",v3:"drawn",t:"chizmoq"},{v1:"drink",v2:"drank",v3:"drunk",t:"ichmoq"},{v1:"drive",v2:"drove",v3:"driven",t:"haydamoq"},{v1:"eat",v2:"ate",v3:"eaten",t:"yemoq"},{v1:"fall",v2:"fell",v3:"fallen",t:"yiqilmoq"},{v1:"feel",v2:"felt",v3:"felt",t:"his qilmoq"},{v1:"find",v2:"found",v3:"found",t:"topmoq"},{v1:"fly",v2:"flew",v3:"flown",t:"uchmoq"},{v1:"forget",v2:"forgot",v3:"forgotten",t:"unutmoq"},{v1:"freeze",v2:"froze",v3:"frozen",t:"muzlamoq"},{v1:"get",v2:"got",v3:"got",t:"olmoq"},{v1:"give",v2:"gave",v3:"given",t:"bermoq"},{v1:"go",v2:"went",v3:"gone",t:"bormoq"},{v1:"grow",v2:"grew",v3:"grown",t:"o'smoq"},{v1:"have",v2:"had",v3:"had",t:"bor bo'lmoq"},{v1:"hear",v2:"heard",v3:"heard",t:"eshitmoq"},{v1:"hide",v2:"hid",v3:"hidden",t:"yashirmoq"},{v1:"hit",v2:"hit",v3:"hit",t:"urmoq"},{v1:"hold",v2:"held",v3:"held",t:"tutmoq"},{v1:"hurt",v2:"hurt",v3:"hurt",t:"og'rimoq"},{v1:"keep",v2:"kept",v3:"kept",t:"saqlamoq"},{v1:"know",v2:"knew",v3:"known",t:"bilmoq"},{v1:"learn",v2:"learned/learnt",v3:"learned/learnt",t:"o'rganmoq"},{v1:"leave",v2:"left",v3:"left",t:"tark etmoq"},{v1:"lend",v2:"lent",v3:"lent",t:"qarz bermoq"},{v1:"let",v2:"let",v3:"let",t:"ruxsat bermoq"},{v1:"lie",v2:"lay",v3:"lain",t:"yotmoq"},{v1:"lose",v2:"lost",v3:"lost",t:"yo'qotmoq"},{v1:"make",v2:"made",v3:"made",t:"qilmoq"},{v1:"mean",v2:"meant",v3:"meant",t:"ma'no bildirmoq"},{v1:"meet",v2:"met",v3:"met",t:"uchrashmoq"},{v1:"pay",v2:"paid",v3:"paid",t:"to'lamoq"},{v1:"put",v2:"put",v3:"put",t:"qo'ymoq"},{v1:"read",v2:"read",v3:"read",t:"o'qimoq"},{v1:"ride",v2:"rode",v3:"ridden",t:"minmoq"},{v1:"ring",v2:"rang",v3:"rung",t:"jiringlamoq"},{v1:"run",v2:"ran",v3:"run",t:"yugurmoq"},{v1:"say",v2:"said",v3:"said",t:"aytmoq"},{v1:"see",v2:"saw",v3:"seen",t:"ko'rmoq"},{v1:"sell",v2:"sold",v3:"sold",t:"sotmoq"},{v1:"send",v2:"sent",v3:"sent",t:"jo'natmoq"},{v1:"shine",v2:"shone",v3:"shone",t:"charaqlamoq"},{v1:"show",v2:"showed",v3:"shown",t:"ko'rsatmoq"},{v1:"shut",v2:"shut",v3:"shut",t:"yopmoq"},{v1:"sing",v2:"sang",v3:"sung",t:"kuylamoq"},{v1:"sit",v2:"sat",v3:"sat",t:"o'tirmoq"},{v1:"sleep",v2:"slept",v3:"slept",t:"uxlamoq"},{v1:"smell",v2:"smelled/smelt",v3:"smelled/smelt",t:"hidlamoq"},{v1:"speak",v2:"spoke",v3:"spoken",t:"gapirmoq"},{v1:"spend",v2:"spent",v3:"spent",t:"sarflamoq"},{v1:"spill",v2:"spilled/spilt",v3:"spilled/spilt",t:"to'kmoq"},{v1:"stand",v2:"stood",v3:"stood",t:"turmoq"},{v1:"swim",v2:"swam",v3:"swum",t:"suzmoq"},{v1:"take",v2:"took",v3:"taken",t:"olmoq"},{v1:"teach",v2:"taught",v3:"taught",t:"o'rgatmoq"},{v1:"tell",v2:"told",v3:"told",t:"aytmoq"},{v1:"think",v2:"thought",v3:"thought",t:"o'ylamoq"},{v1:"throw",v2:"threw",v3:"thrown",t:"uloqtirmoq"},{v1:"understand",v2:"understood",v3:"understood",t:"tushunmoq"},{v1:"wake",v2:"woke",v3:"woken",t:"uyqudan turmoq"},{v1:"wear",v2:"wore",v3:"worn",t:"kiymoq"},{v1:"win",v2:"won",v3:"won",t:"yutmoq"},{v1:"write",v2:"wrote",v3:"written",t:"yozmoq"}
 ];
@@ -99,7 +99,7 @@ const verbsList = [
 let allQuestions = [], questions = [], current = 0, score = 0, lives = 3, time = 8, timer = null, gameActive = true;
 let userName = "Player", userId = "guest";
 
-/* ========== UI ========== */
+/* ========== UI YORDAMCHI ========== */
 function $(id){ return document.getElementById(id); }
 function notify(text,type="success"){ const n=document.createElement("div"); n.className="notification "+type; n.innerText=text; document.body.appendChild(n); setTimeout(()=>n.remove(),1800); }
 
@@ -117,20 +117,18 @@ async function loadUserName(){
                 const { data } = await db.from("leaderboard").select("user_name").eq("user_id", userId).order("created_at", { ascending: false }).limit(1);
                 if (data && data.length > 0 && data[0].user_name && data[0].user_name !== "Player") {
                     userName = data[0].user_name;
-                    console.log("Eski ism yuklandi:", userName);
                     return;
                 }
-            } catch(e) { console.log("Eski ism topilmadi"); }
+            } catch(e) {}
         }
         userName = defaultName;
     }
     
     if (userName === "Player" || userName === "") {
-        const name = prompt("🏆 Reytingda ko'rinishi uchun ismingizni kiriting:", userName === "Player" ? "" : userName);
+        const name = prompt("🏆 Reytingda ko'rinishi uchun ismingizni kiriting:", "");
         if (name && name.trim()) { userName = name.trim(); }
-        else { const names = ["O'quvchi", "Student", "Learner", "Pupil"]; userName = names[Math.floor(Math.random() * names.length)] + "_" + Math.floor(Math.random() * 100); }
+        else { const names = ["O'quvchi", "Student", "Learner"]; userName = names[Math.floor(Math.random() * names.length)] + "_" + Math.floor(Math.random() * 100); }
     }
-    console.log("Foydalanuvchi:", userName, "ID:", userId);
 }
 
 /* ========== SAVOLLARNI TAYYORLASH ========== */
@@ -148,42 +146,112 @@ function loadQuestion(){ if(!gameActive)return; if(current>=questions.length){en
 function checkAnswer(){ if(!gameActive)return; const q=questions[current]; const ans=$("answer").value.trim().toLowerCase(); const correctAnswers=q.correct.toLowerCase().split('/'); const isCorrect=correctAnswers.some(c=>ans===c.trim()); clearInterval(timer); if(isCorrect){ score++; const bonus=Math.floor(time/2); if(bonus>0){score+=bonus;notify("✅ To'g'ri! +1 +"+bonus+" bonus","success");} else notify("✅ To'g'ri! +1","success"); $("score").innerText=score; current++; loadQuestion(); } else { lives--; updateLives(); notify("❌ "+q.correct,"error"); if(lives<=0)endGame(); else{current++;loadQuestion();} } }
 function skipQuestion(){ if(!gameActive)return; clearInterval(timer); lives--; updateLives(); notify("⏭️ Skip","error"); if(lives<=0)endGame(); else{current++;loadQuestion();} }
 
-/* ========== LEADERBOARD XABARINI YANGILASH ========== */
-async function updateLeaderboardMessage(){
-if(!db)return;
-try{
-const{data:topPlayers}=await db.from("leaderboard").select("user_name,score").order("score",{ascending:false}).limit(10);
-if(!topPlayers||topPlayers.length===0)return;
-let message="🏆 **TOP 10 O'YINCHILAR**\n\n";
-topPlayers.forEach((p,i)=>{ const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`; message+=`${medal} ${p.user_name}: ${p.score} ball\n`; });
-message+=`\n🔄 Yangilandi: ${new Date().toLocaleTimeString('uz-UZ')}`;
-const inlineKeyboard={inline_keyboard:[[{text:"🎮 O'yinni boshlash",url:GAME_URL}]]};
-const{data:configData}=await db.from("config").select("message_id").eq("key","leaderboard_msg").single();
-if(configData&&configData.message_id){
-await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:CHANNEL_ID,message_id:configData.message_id,text:message,parse_mode:"Markdown",reply_markup:inlineKeyboard})});
-}else{
-const response=await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:CHANNEL_ID,text:message,parse_mode:"Markdown",reply_markup:inlineKeyboard})});
-const result=await response.json();
-if(result.ok&&result.result){ const messageId=result.result.message_id; await db.from("config").upsert({key:"leaderboard_msg",message_id:messageId}); await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:CHANNEL_ID,message_id:messageId,disable_notification:true})}); }
-}
-}catch(e){console.log("Leaderboard xatosi:",e);}
+/* ========== YANGI XABAR YARATISH ========== */
+async function createNewMessage(message, inlineKeyboard){
+    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ chat_id: CHANNEL_ID, text: message, parse_mode: "Markdown", reply_markup: inlineKeyboard })
+    });
+    const result = await response.json();
+    if(result.ok && result.result){
+        const messageId = result.result.message_id;
+        await db.from("config").upsert({ key: "leaderboard_msg", message_id: messageId });
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({ chat_id: CHANNEL_ID, message_id: messageId, disable_notification: true })
+        });
+    }
 }
 
-/* ========== O'YIN TUGADI ========== */
+/* ========== LEADERBOARD XABARINI YANGILASH (TOP 10) ========== */
+async function updateLeaderboardMessage(){
+if(!db) return;
+try{
+    const { data: topPlayers } = await db.from("leaderboard").select("user_name,score").order("score",{ascending:false}).limit(10);
+    if(!topPlayers || topPlayers.length===0) return;
+    
+    let message = "🏆 **TOP 10 O'YINCHILAR**\n\n";
+    topPlayers.forEach((p,i)=>{
+        const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`;
+        message += `${medal} ${p.user_name}: ${p.score} ball\n`;
+    });
+    message += `\n🔄 Yangilandi: ${new Date().toLocaleTimeString('uz-UZ')}`;
+    
+    const inlineKeyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
+    const { data: configData } = await db.from("config").select("message_id").eq("key","leaderboard_msg").single();
+    
+    if(configData && configData.message_id){
+        const editResult = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({ chat_id: CHANNEL_ID, message_id: configData.message_id, text: message, parse_mode: "Markdown", reply_markup: inlineKeyboard })
+        });
+        const editJson = await editResult.json();
+        if(!editJson.ok) await createNewMessage(message, inlineKeyboard);
+    } else {
+        await createNewMessage(message, inlineKeyboard);
+    }
+}catch(e){ console.log("Leaderboard xatosi:", e); }
+}
+
+/* ========== O'YIN TUGADI (FAQAT REKORD YANGILANADI) ========== */
 async function endGame(completed=false){
 clearInterval(timer); gameActive=false;
 $("gameScreen").style.display="none"; $("gameOverScreen").style.display="block";
-$("finalScore").innerText=score; $("finalText").innerText=completed?`🎉 Barcha ${questions.length} savol!`:`${current}/${questions.length} savol`;
-if(db){ try{ await db.from("leaderboard").upsert({user_id:userId,user_name:userName,score:score,created_at:new Date().toISOString()},{onConflict:'user_id'}); }catch(e){} }
+$("finalScore").innerText=score;
+
+let finalMessage = completed ? `🎉 Barcha ${questions.length} savol!` : `${current}/${questions.length} savol`;
+
+if(db){
+try{
+    const { data: existing } = await db.from("leaderboard").select("score").eq("user_id", userId).single();
+    
+    if (existing) {
+        if (score > existing.score) {
+            await db.from("leaderboard").update({ 
+                user_name: userName, 
+                score: score, 
+                questions_answered: current, 
+                created_at: new Date().toISOString() 
+            }).eq("user_id", userId);
+            finalMessage = "🏆 YANGI REKORD! " + finalMessage;
+        } else {
+            finalMessage = "📊 " + finalMessage + "\nEng yaxshi: " + existing.score;
+        }
+    } else {
+        await db.from("leaderboard").insert([{ 
+            user_id: userId, 
+            user_name: userName, 
+            score: score, 
+            questions_answered: current, 
+            created_at: new Date().toISOString() 
+        }]);
+        finalMessage = "🆕 Birinchi o'yin! " + finalMessage;
+    }
+}catch(e){ console.log("Saqlash xatosi:", e); }
+}
+
+$("finalText").innerText = finalMessage;
 await updateLeaderboardMessage();
 }
 
-/* ========== LEADERBOARD EKRANI ========== */
+/* ========== LEADERBOARD EKRANI (TOP 10) ========== */
 async function showLeaderboard(){
 $("gameScreen").style.display="none"; $("gameOverScreen").style.display="none"; $("leaderboardScreen").style.display="block";
 const list=$("leaderboardList"); list.innerHTML="Yuklanmoqda...";
 if(!db){list.innerHTML="Ulanish yo'q";return;}
-try{ const{data:topPlayers}=await db.from("leaderboard").select("user_name,score").order("score",{ascending:false}).limit(10); if(!topPlayers||topPlayers.length===0){list.innerHTML="Hali o'yinchi yo'q";return;} let html=""; topPlayers.forEach((p,i)=>{ const medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`; html+=`<div style="padding:12px;background:#333;margin:5px 0;border-radius:12px;"><strong>${medal}</strong> ${p.user_name}: ${p.score} ball</div>`; }); list.innerHTML=html; }catch(e){list.innerHTML="Xatolik";}
+try{ 
+    const { data: topPlayers } = await db.from("leaderboard").select("user_name,score").order("score",{ascending:false}).limit(10);
+    if(!topPlayers || topPlayers.length===0){list.innerHTML="Hali o'yinchi yo'q";return;} 
+    let html=""; 
+    topPlayers.forEach((p,i)=>{ 
+        const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`; 
+        html+=`<div style="padding:12px;background:#333;margin:5px 0;border-radius:12px;"><strong>${medal}</strong> ${p.user_name}: ${p.score} ball</div>`; 
+    }); 
+    list.innerHTML=html; 
+}catch(e){list.innerHTML="Xatolik";}
 }
 function hideLeaderboard(){ $("leaderboardScreen").style.display="none"; if(gameActive)$("gameScreen").style.display="block"; else $("gameOverScreen").style.display="block"; }
 
