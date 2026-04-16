@@ -88,7 +88,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ========== TELEGRAM BOT ========== */
 const BOT_TOKEN = "8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo";
 const CHANNEL_ID = "@englishcodebyshaxzod";
-const GAME_URL = "https://irregular-verbs-game-alpha.vercel.app"; // <-- O'Z URL'INGIZ
+const GAME_URL = "https://irregular-verbs-game-alpha.vercel.app";
 
 /* ========== FE'LLAR ========== */
 const verbsList = [
@@ -103,9 +103,8 @@ let userName = "", userId = "";
 function $(id){ return document.getElementById(id); }
 function notify(text,type="success"){ const n=document.createElement("div"); n.className="notification "+type; n.innerText=text; document.body.appendChild(n); setTimeout(()=>n.remove(),1800); }
 
-/* ========== USER (ISMRNI BIR MARTA SO'RASH) ========== */
+/* ========== USER ========== */
 async function loadUserName(){
-    // Avval localStorage'dan tekshirish
     const savedName = localStorage.getItem('verbGame_playerName');
     const savedId = localStorage.getItem('verbGame_userId');
     
@@ -115,7 +114,6 @@ async function loadUserName(){
         return;
     }
     
-    // Telegram orqali olish
     if(tg.initDataUnsafe && tg.initDataUnsafe.user){
         const u = tg.initDataUnsafe.user;
         userId = "tg_" + u.id;
@@ -123,7 +121,6 @@ async function loadUserName(){
         userName = full || u.username || "";
     }
     
-    // Agar ism bo'sh bo'lsa yoki "Player" bo'lsa, so'rash
     if(!userName || userName === "Player" || userName === ""){
         let name = prompt("🏆 Reytingda ko'rinishi uchun ismingizni kiriting:", "");
         if(!name || !name.trim()){
@@ -133,12 +130,10 @@ async function loadUserName(){
         userName = name.trim();
     }
     
-    // Agar userId bo'sh bo'lsa, yaratish
     if(!userId){
         userId = "guest_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
     }
     
-    // localStorage'ga saqlash
     localStorage.setItem('verbGame_playerName', userName);
     localStorage.setItem('verbGame_userId', userId);
 }
@@ -229,7 +224,7 @@ function skipQuestion(){
     loadQuestion(); 
 }
 
-/* ========== LEADERBOARD: TOP 10 (TAKRORIY ISMLARSIZ) ========== */
+/* ========== LEADERBOARD: TOP 10 ========== */
 async function getTop10(){
     const { data } = await db
         .from("leaderboard")
@@ -238,7 +233,6 @@ async function getTop10(){
     
     if(!data || data.length === 0) return [];
     
-    // Har bir user_id uchun faqat eng yuqori ball
     const bestScores = new Map();
     for(let p of data){
         if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score){
@@ -251,53 +245,52 @@ async function getTop10(){
         .slice(0, 10);
 }
 
-/* ========== NATIJANI SAQLASH (UPSERT) ========== */
+/* ========== NATIJANI SAQLASH (BEST SCORE) ========== */
 async function saveScore(){
     if(!userId || !userName) return 0;
     
-    // Avvalgi eng yaxshi ballni tekshirish
-    const { data: old } = await db
+    // Avvalgi eng yaxshi ballni olish
+    const { data: oldData } = await db
         .from("leaderboard")
         .select("score")
         .eq("user_id", userId)
         .maybeSingle();
     
-    const prevBest = old ? old.score : 0;
+    const prevBest = oldData ? oldData.score : 0;
     
-    // UPSERT: mavjud bo'lsa yangilash, bo'lmasa qo'shish
-    if(old){
-        if(score > prevBest){
-            await db.from("leaderboard")
-                .update({ user_name: userName, score: score, updated_at: new Date().toISOString() })
-                .eq("user_id", userId);
-        }
-    } else {
-        await db.from("leaderboard")
-            .insert({ user_id: userId, user_name: userName, score: score, created_at: new Date().toISOString() });
+    // Yangi ball yuqori bo'lsa yoki birinchi marta bo'lsa
+    if(score > prevBest){
+        const { error } = await db
+            .from("leaderboard")
+            .upsert({ 
+                user_id: userId, 
+                user_name: userName, 
+                score: score,
+                updated_at: new Date().toISOString() 
+            }, { onConflict: 'user_id' });
+        
+        if(error) console.log("Upsert xatosi:", error);
+        return score;
     }
     
-    return Math.max(score, prevBest);
+    return prevBest;
 }
 
-/* ========== TELEGRAM XABARINI YANGILASH (EDIT) ========== */
-let isUpdating = false;
+/* ========== TELEGRAM XABARINI YANGILASH ========== */
 async function updateTelegramLeaderboard(){
-    if(isUpdating) return;
-    isUpdating = true;
+    const top = await getTop10();
+    if(top.length === 0) return;
+    
+    let text = "🏆 TOP 10 O'YINCHILAR\n\n";
+    top.forEach((p, i) => {
+        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i+1) + ".";
+        text += `${medal} ${p.user_name}: ${p.score} ball\n`;
+    });
+    text += "\n🎮 Pastdagi tugma orqali o'ynang!";
+    
+    const keyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
     
     try{
-        const top = await getTop10();
-        if(top.length === 0){ isUpdating = false; return; }
-        
-        let text = "🏆 TOP 10 O'YINCHILAR\n\n";
-        top.forEach((p, i) => {
-            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i+1) + ".";
-            text += `${medal} ${p.user_name}: ${p.score} ball\n`;
-        });
-        text += "\n🎮 Pastdagi tugma orqali o'ynang!";
-        
-        const keyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
-        
         // Config'dan message_id ni olish
         const { data: cfg } = await db
             .from("config")
@@ -310,43 +303,57 @@ async function updateTelegramLeaderboard(){
             const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ chat_id: CHANNEL_ID, message_id: cfg.message_id, text: text, reply_markup: keyboard })
+                body: JSON.stringify({ 
+                    chat_id: CHANNEL_ID, 
+                    message_id: cfg.message_id, 
+                    text: text, 
+                    reply_markup: keyboard 
+                })
             });
             const json = await res.json();
             
+            // Agar xato bo'lsa (masalan xabar o'chirilgan)
             if(!json.ok){
-                // Xabar o'chirilgan bo'lsa, yangi yaratish
-                console.log("Xabar topilmadi, yangi yaratilmoqda...");
-                await createNewLeaderboardMessage(text, keyboard);
+                console.log("Edit xatosi, yangi xabar yaratilmoqda...");
+                await createNewMessage(text, keyboard);
             }
         } else {
-            // Yangi xabar yaratish
-            await createNewLeaderboardMessage(text, keyboard);
+            await createNewMessage(text, keyboard);
         }
     } catch(e){
         console.log("Leaderboard xatosi:", e);
+        await createNewMessage(text, keyboard);
     }
-    
-    isUpdating = false;
 }
 
-async function createNewLeaderboardMessage(text, keyboard){
+async function createNewMessage(text, keyboard){
     const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: CHANNEL_ID, text: text, reply_markup: keyboard })
+        body: JSON.stringify({ 
+            chat_id: CHANNEL_ID, 
+            text: text, 
+            reply_markup: keyboard 
+        })
     });
     const json = await res.json();
     
     if(json.ok && json.result){
         // Yangi message_id ni saqlash
-        await db.from("config").upsert({ key: "leaderboard_msg", message_id: json.result.message_id });
+        await db.from("config").upsert({ 
+            key: "leaderboard_msg", 
+            message_id: json.result.message_id 
+        });
         
         // Pin qilish
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ chat_id: CHANNEL_ID, message_id: json.result.message_id, disable_notification: true })
+            body: JSON.stringify({ 
+                chat_id: CHANNEL_ID, 
+                message_id: json.result.message_id, 
+                disable_notification: true 
+            })
         });
     }
 }
@@ -361,7 +368,9 @@ async function endGame(completed = false){
     $("finalScore").innerText = score;
     
     const best = await saveScore();
-    $("finalText").innerText = completed ? `🎉 Tugatdingiz!\nEng yaxshi: ${best}` : `📊 Eng yaxshi: ${best}`;
+    $("finalText").innerText = completed 
+        ? `🎉 Tugatdingiz!\n🏆 Eng yaxshi: ${best}` 
+        : `📊 Bu safar: ${score}\n🏆 Eng yaxshi: ${best}`;
     
     await updateTelegramLeaderboard();
 }
