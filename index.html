@@ -150,31 +150,26 @@ function skipQuestion(){ if(!gameActive)return; clearInterval(timer); lives--; u
 async function createNewMessage(message, inlineKeyboard){
     const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
         method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ chat_id: CHANNEL_ID, text: message, parse_mode: "Markdown", reply_markup: inlineKeyboard })
+        body:JSON.stringify({ chat_id: CHANNEL_ID, text: message, reply_markup: inlineKeyboard })
     });
     const result = await response.json();
     if(result.ok && result.result){
-        await db.from("config").upsert({ key: "leaderboard_msg", message_id: result.result.message_id });
+        const messageId = result.result.message_id;
+        await db.from("config").upsert({ key: "leaderboard_msg", message_id: messageId });
         await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`,{
             method:"POST", headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({ chat_id: CHANNEL_ID, message_id: result.result.message_id, disable_notification: true })
+            body:JSON.stringify({ chat_id: CHANNEL_ID, message_id: messageId, disable_notification: true })
         });
     }
 }
 
-/* ========== LEADERBOARD YANGILASH (SODDA FORMAT) ========== */
+/* ========== LEADERBOARD YANGILASH ========== */
 async function updateLeaderboardMessage(){
 if(!db) return;
 try{
-    // Barcha o'yinchilarni ball bo'yicha saralash
-    const { data: allPlayers } = await db
-        .from("leaderboard")
-        .select("user_name, user_id, score")
-        .order("score", { ascending: false });
-    
+    const { data: allPlayers } = await db.from("leaderboard").select("user_name, user_id, score").order("score", { ascending: false });
     if(!allPlayers || allPlayers.length===0) return;
     
-    // Har bir o'yinchining faqat eng yuqori balini olish
     const bestScores = new Map();
     for(let p of allPlayers) {
         if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score) {
@@ -182,99 +177,30 @@ try{
         }
     }
     
-    // Ball bo'yicha saralash (yuqoridan pastga)
-    const sortedPlayers = Array.from(bestScores.values())
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 10);
+    const sortedPlayers = Array.from(bestScores.values()).sort((a, b) => b.score - a.score).slice(0, 10);
     
-    // Xabar matnini tayyorlash (oddiy matn, emoji'lar bilan)
     let message = "🏆 TOP 10 O'YINCHILAR\n\n";
-    
     sortedPlayers.forEach((p, i) => {
         const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i+1}.`;
         message += `${medal} ${p.name}: ${p.score} ball\n`;
     });
-    
-    // Qo'shimcha bo'sh o'rinlar uchun "-" qo'shish (ixtiyoriy)
-    if (sortedPlayers.length < 10) {
-        message += `\n${10 - sortedPlayers.length} ta bo'sh o'rin`;
-    }
-    
+    if (sortedPlayers.length < 10) message += `\n${10 - sortedPlayers.length} ta bo'sh o'rin`;
     message += `\n🔄 Yangilandi: ${new Date().toLocaleTimeString('uz-UZ')}`;
     
-    const inlineKeyboard = { 
-        inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] 
-    };
-    
-    const { data: configData } = await db
-        .from("config")
-        .select("message_id")
-        .eq("key", "leaderboard_msg")
-        .single();
+    const inlineKeyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
+    const { data: configData } = await db.from("config").select("message_id").eq("key","leaderboard_msg").single();
     
     if(configData && configData.message_id){
-        // Xabarni tahrirlash (parse_mode ISHLATILMAYDI)
         const editResult = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,{
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                chat_id: CHANNEL_ID, 
-                message_id: configData.message_id, 
-                text: message,
-                reply_markup: inlineKeyboard
-            })
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({ chat_id: CHANNEL_ID, message_id: configData.message_id, text: message, reply_markup: inlineKeyboard })
         });
         const editJson = await editResult.json();
-        
-        if(!editJson.ok) {
-            console.log("Tahrirlashda xato, yangi xabar yaratilmoqda...");
-            await createNewMessage(message, inlineKeyboard);
-        }
+        if(!editJson.ok) await createNewMessage(message, inlineKeyboard);
     } else {
         await createNewMessage(message, inlineKeyboard);
     }
-} catch(e) { 
-    console.log("Leaderboard xatosi:", e); 
-}
-}
-
-/* ========== YANGI XABAR YARATISH ========== */
-async function createNewMessage(message, inlineKeyboard){
-    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-            chat_id: CHANNEL_ID, 
-            text: message, 
-            reply_markup: inlineKeyboard 
-        })
-    });
-    const result = await response.json();
-    
-    if(result.ok && result.result){
-        const messageId = result.result.message_id;
-        
-        // ID'ni saqlash
-        await db.from("config").upsert({ 
-            key: "leaderboard_msg", 
-            message_id: messageId 
-        });
-        
-        // Pin qilish
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`,{
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                chat_id: CHANNEL_ID, 
-                message_id: messageId, 
-                disable_notification: true 
-            })
-        });
-        
-        console.log("Yangi leaderboard xabari yaratildi, ID:", messageId);
-    } else {
-        console.log("Xabar yaratishda xato:", result);
-    }
+}catch(e){ console.log("Leaderboard xatosi:", e); }
 }
 
 /* ========== O'YIN TUGADI ========== */
@@ -304,62 +230,23 @@ await updateLeaderboardMessage();
 
 /* ========== REYTING EKRANI ========== */
 async function showLeaderboard(){
-$("gameScreen").style.display="none"; 
-$("gameOverScreen").style.display="none"; 
-$("leaderboardScreen").style.display="block";
-
-const list = $("#leaderboardList"); 
-list.innerHTML = "Yuklanmoqda...";
-
-if(!db){
-    list.innerHTML = "Ulanish yo'q";
-    return;
-}
-
+$("gameScreen").style.display="none"; $("gameOverScreen").style.display="none"; $("leaderboardScreen").style.display="block";
+const list=$("leaderboardList"); list.innerHTML="Yuklanmoqda...";
+if(!db){list.innerHTML="Ulanish yo'q";return;}
 try{ 
-    const { data: allPlayers } = await db
-        .from("leaderboard")
-        .select("user_name, user_id, score")
-        .order("score", { ascending: false });
-    
-    if(!allPlayers || allPlayers.length === 0){
-        list.innerHTML = "Hali o'yinchi yo'q";
-        return;
-    }
-    
-    // Har bir o'yinchining eng yuqori balini olish
+    const { data: all } = await db.from("leaderboard").select("user_name, user_id, score").order("score",{ascending:false});
+    if(!all||all.length===0){list.innerHTML="Hali o'yinchi yo'q";return;}
     const bestScores = new Map();
-    for(let p of allPlayers) {
-        if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score) {
-            bestScores.set(p.user_id, { name: p.user_name, score: p.score });
-        }
-    }
-    
-    // Saralash va 10 tagacha olish
-    const sortedPlayers = Array.from(bestScores.values())
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 10);
-    
-    let html = ""; 
-    sortedPlayers.forEach((p, i) => { 
-        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i+1}.`; 
-        html += `<div style="padding:12px;background:#333;margin:5px 0;border-radius:12px;">
-            <strong>${medal}</strong> ${p.name}: ${p.score} ball
-        </div>`; 
-    });
-    
-    if (sortedPlayers.length < 10) {
-        html += `<div style="padding:12px;background:#222;margin:5px 0;border-radius:12px;color:#aaa;text-align:center;">
-            ${10 - sortedPlayers.length} ta bo'sh o'rin
-        </div>`;
-    }
-    
-    list.innerHTML = html; 
-} catch(e) {
-    list.innerHTML = "Xatolik yuz berdi";
-    console.log("Reyting yuklashda xato:", e);
+    for(let p of all) { if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score) bestScores.set(p.user_id, { name: p.user_name, score: p.score }); }
+    const sorted = Array.from(bestScores.values()).sort((a,b)=>b.score-a.score).slice(0,10);
+    let html=""; 
+    sorted.forEach((p,i)=>{ const m=i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`; html+=`<div style="padding:12px;background:#333;margin:5px 0;border-radius:12px;"><strong>${m}</strong> ${p.name}: ${p.score} ball</div>`; });
+    if(sorted.length<10) html+=`<div style="padding:12px;background:#222;margin:5px 0;border-radius:12px;color:#aaa;text-align:center;">${10-sorted.length} ta bo'sh o'rin</div>`;
+    list.innerHTML=html;
+}catch(e){list.innerHTML="Xatolik";}
 }
-}
+function hideLeaderboard(){ $("leaderboardScreen").style.display="none"; if(gameActive)$("gameScreen").style.display="block"; else $("gameOverScreen").style.display="block"; }
+
 /* ========== RESTART ========== */
 async function restartGame(){
 clearInterval(timer); score=0; lives=3; current=0; gameActive=true;
