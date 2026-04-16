@@ -1,278 +1,636 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>Irregular Verbs Challenge</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#111;color:#fff;font-family:Arial,sans-serif;padding:20px;text-align:center;min-height:100vh;}
-.container{max-width:500px;margin:auto;}
-.header{display:flex;justify-content:space-between;gap:10px;margin-bottom:15px;}
-.box{background:#222;padding:12px;border-radius:14px;flex:1;font-size:20px;}
-.score{color:#2a9d8f;}.lives{color:#e76f51;}
-.progress{background:#222;padding:10px;border-radius:14px;margin-bottom:15px;}
-.timer{font-size:24px;margin:15px 0;color:#2a9d8f;font-weight:bold;}
-.verb{font-size:60px;font-weight:bold;color:#2a9d8f;margin-top:15px;}
-.translation{color:#aaa;margin:10px 0 20px;font-size:18px;}
-.question{font-size:20px;margin-bottom:12px;}
-input{width:100%;padding:14px;font-size:18px;border:none;border-radius:14px;margin-bottom:10px;text-align:center;}
-button{width:100%;padding:14px;font-size:18px;border:none;border-radius:14px;cursor:pointer;font-weight:bold;margin-bottom:10px;}
-.primary{background:#2a9d8f;color:white;}
-.secondary{background:#444;color:white;}
-.danger{background:#e76f51;color:white;}
-.leaderboard-btn{background:#ffd700;color:#111;}
-.gameover{background:#222;padding:25px;border-radius:18px;margin-top:30px;}
-.final{font-size:55px;color:#2a9d8f;margin:15px 0;font-weight:bold;}
-.notification{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:40px;z-index:999;font-weight:bold;}
-.success{background:#2a9d8f;}.error{background:#e76f51;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#111;color:#fff;font-family:Arial,sans-serif;
+  padding:20px;text-align:center;min-height:100vh;
+}
+.container{max-width:500px;margin:auto}
+.header{display:flex;gap:10px;margin-bottom:15px}
+.box{
+  background:#222;padding:12px;border-radius:14px;
+  flex:1;font-size:20px
+}
+.score{color:#2a9d8f}
+.lives{color:#e76f51}
+.progress{
+  background:#222;padding:10px;border-radius:14px;
+  margin-bottom:15px
+}
+.timer{
+  font-size:24px;margin:15px 0;
+  color:#2a9d8f;font-weight:bold
+}
+.verb{
+  font-size:58px;font-weight:bold;
+  color:#2a9d8f;margin-top:10px
+}
+.translation{
+  color:#aaa;margin:10px 0 20px;font-size:18px
+}
+.question{
+  font-size:20px;margin-bottom:12px
+}
+input{
+  width:100%;padding:14px;font-size:18px;
+  border:none;border-radius:14px;
+  margin-bottom:10px;text-align:center
+}
+button{
+  width:100%;padding:14px;font-size:18px;
+  border:none;border-radius:14px;
+  cursor:pointer;font-weight:bold;
+  margin-bottom:10px
+}
+.primary{background:#2a9d8f;color:#fff}
+.secondary{background:#444;color:#fff}
+.danger{background:#e76f51;color:#fff}
+.leaderboard-btn{background:#ffd700;color:#111}
+.gameover{
+  background:#222;padding:25px;
+  border-radius:18px;margin-top:30px
+}
+.final{
+  font-size:55px;color:#2a9d8f;
+  margin:15px 0;font-weight:bold
+}
+.notification{
+  position:fixed;top:20px;left:50%;
+  transform:translateX(-50%);
+  padding:12px 20px;border-radius:40px;
+  z-index:999;font-weight:bold
+}
+.success{background:#2a9d8f}
+.error{background:#e76f51}
 </style>
 </head>
 
 <body>
 <div class="container">
 
+<!-- GAME -->
 <div id="gameScreen">
-<div class="header">
-<div class="box score">🏆 <span id="score">0</span></div>
-<div class="box lives">❤️ <span id="lives">3</span></div>
-</div>
-<div class="progress" id="progress">1 / 156</div>
-<div class="timer" id="timer">⏱️ 8s</div>
-<div class="verb" id="verb">go</div>
-<div class="translation" id="translation">bormoq</div>
-<div class="question" id="question">V2 shaklini yozing</div>
-<input id="answer" placeholder="Javobingiz..." autofocus>
-<button class="primary" id="checkBtn">✅ Tekshirish</button>
-<button class="secondary" id="skipBtn">⏭️ Skip</button>
-<button class="danger" id="restartBtn">🔄 Restart</button>
-<button class="leaderboard-btn" id="leaderboardBtn">🏆 Reyting</button>
+  <div class="header">
+    <div class="box score">🏆 <span id="score">0</span></div>
+    <div class="box lives">❤️ <span id="lives">3</span></div>
+  </div>
+
+  <div class="progress" id="progress">1 / 156</div>
+  <div class="timer" id="timer">⏱️ 8s</div>
+
+  <div class="verb" id="verb">go</div>
+  <div class="translation" id="translation">bormoq</div>
+  <div class="question" id="question">V2 shaklini yozing</div>
+
+  <input id="answer" placeholder="Javobingiz..." autofocus />
+
+  <button class="primary" id="checkBtn">✅ Tekshirish</button>
+  <button class="secondary" id="skipBtn">⏭️ Skip</button>
+  <button class="danger" id="restartBtn">🔄 Restart</button>
+  <button class="leaderboard-btn" id="leaderboardBtn">🏆 Reyting</button>
 </div>
 
-<div id="gameOverScreen" style="display:none;">
-<div class="gameover">
-<h2>🎯 O'yin tugadi!</h2>
-<div class="final" id="finalScore">0</div>
-<div id="finalText"></div>
-<br>
-<button class="primary" id="playAgainBtn">🔄 Qayta o'ynash</button>
-<button class="leaderboard-btn" id="viewLeaderboardBtn">🏆 Reytingni ko'rish</button>
-</div>
+<!-- GAME OVER -->
+<div id="gameOverScreen" style="display:none">
+  <div class="gameover">
+    <h2>🎯 O'yin tugadi!</h2>
+    <div class="final" id="finalScore">0</div>
+    <div id="finalText"></div>
+    <br>
+    <button class="primary" id="playAgainBtn">🔄 Qayta o'ynash</button>
+    <button class="leaderboard-btn" id="viewLeaderboardBtn">🏆 Reyting</button>
+  </div>
 </div>
 
-<div id="leaderboardScreen" style="display:none;">
-<div class="gameover">
-<h2>🏆 TOP 10 O'yinchilar</h2>
-<div id="leaderboardList" style="text-align:left; margin:20px 0;">Yuklanmoqda...</div>
-<button class="primary" id="backBtn">⬅️ Orqaga</button>
-</div>
+<!-- LEADERBOARD -->
+<div id="leaderboardScreen" style="display:none">
+  <div class="gameover">
+    <h2>🏆 TOP 10</h2>
+    <div id="leaderboardList" style="text-align:left;margin:20px 0">Yuklanmoqda...</div>
+    <button class="primary" id="backBtn">⬅️ Orqaga</button>
+  </div>
 </div>
 
 </div>
 
 <script>
-const tg = window.Telegram?.WebApp || { ready(){}, expand(){}, initDataUnsafe:{} };
+/* ==================================================
+   TELEGRAM
+================================================== */
+const tg = window.Telegram?.WebApp || {
+  ready(){},
+  expand(){},
+  initDataUnsafe:{}
+};
 tg.ready();
 tg.expand();
 
-/* ========== SUPABASE ========== */
+/* ==================================================
+   SUPABASE
+================================================== */
 const SUPABASE_URL = "https://vkliiyqxjuhxaafrnyrb.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrbGlpeXF4anVoeGFhZnJueXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzkyODYsImV4cCI6MjA5MTcxNTI4Nn0.Jn6xSg8GryDygzB3Y_y99zd1hGJ7ekXZVeNY312GJb8";
+const SUPABASE_KEY = "PASTE_YOUR_KEY_HERE";
+
 let db = null;
-if(window.supabase){ const { createClient } = window.supabase; db = createClient(SUPABASE_URL,SUPABASE_KEY); }
+if(window.supabase){
+  const { createClient } = window.supabase;
+  db = createClient(SUPABASE_URL, SUPABASE_KEY);
+}
 
-/* ========== TELEGRAM BOT ========== */
-const BOT_TOKEN = "8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo";
+/* ==================================================
+   TELEGRAM BOT
+================================================== */
+const BOT_TOKEN = "PASTE_BOT_TOKEN_HERE";
 const CHANNEL_ID = "@englishcodebyshaxzod";
-const GAME_URL = "https://irregular-verbs-game-alpha.vercel.app"; // <-- O'Z URL'INGIZNI QO'YING
+const GAME_URL = "https://irregular-verbs-game-alpha.vercel.app";
 
-/* ========== FE'LLAR ========== */
+/* ==================================================
+   VERBS
+================================================== */
 const verbsList = [
-{v1:"be",v2:"was/were",v3:"been",t:"bo'lmoq"},{v1:"become",v2:"became",v3:"become",t:"bo'lmoq, aylanmoq"},{v1:"begin",v2:"began",v3:"begun",t:"boshlamoq"},{v1:"bite",v2:"bit",v3:"bitten",t:"tishlamoq"},{v1:"blow",v2:"blew",v3:"blown",t:"puflamoq"},{v1:"break",v2:"broke",v3:"broken",t:"sindirmoq"},{v1:"bring",v2:"brought",v3:"brought",t:"olib kelmoq"},{v1:"build",v2:"built",v3:"built",t:"qurmoq"},{v1:"buy",v2:"bought",v3:"bought",t:"sotib olmoq"},{v1:"catch",v2:"caught",v3:"caught",t:"tutmoq"},{v1:"choose",v2:"chose",v3:"chosen",t:"tanlamoq"},{v1:"come",v2:"came",v3:"come",t:"kelmoq"},{v1:"cost",v2:"cost",v3:"cost",t:"narxda turmoq"},{v1:"cut",v2:"cut",v3:"cut",t:"kesmoq"},{v1:"do",v2:"did",v3:"done",t:"bajarmoq"},{v1:"draw",v2:"drew",v3:"drawn",t:"chizmoq"},{v1:"drink",v2:"drank",v3:"drunk",t:"ichmoq"},{v1:"drive",v2:"drove",v3:"driven",t:"haydamoq"},{v1:"eat",v2:"ate",v3:"eaten",t:"yemoq"},{v1:"fall",v2:"fell",v3:"fallen",t:"yiqilmoq"},{v1:"feel",v2:"felt",v3:"felt",t:"his qilmoq"},{v1:"find",v2:"found",v3:"found",t:"topmoq"},{v1:"fly",v2:"flew",v3:"flown",t:"uchmoq"},{v1:"forget",v2:"forgot",v3:"forgotten",t:"unutmoq"},{v1:"freeze",v2:"froze",v3:"frozen",t:"muzlamoq"},{v1:"get",v2:"got",v3:"got",t:"olmoq"},{v1:"give",v2:"gave",v3:"given",t:"bermoq"},{v1:"go",v2:"went",v3:"gone",t:"bormoq"},{v1:"grow",v2:"grew",v3:"grown",t:"o'smoq"},{v1:"have",v2:"had",v3:"had",t:"bor bo'lmoq"},{v1:"hear",v2:"heard",v3:"heard",t:"eshitmoq"},{v1:"hide",v2:"hid",v3:"hidden",t:"yashirmoq"},{v1:"hit",v2:"hit",v3:"hit",t:"urmoq"},{v1:"hold",v2:"held",v3:"held",t:"tutmoq"},{v1:"hurt",v2:"hurt",v3:"hurt",t:"og'rimoq"},{v1:"keep",v2:"kept",v3:"kept",t:"saqlamoq"},{v1:"know",v2:"knew",v3:"known",t:"bilmoq"},{v1:"learn",v2:"learned/learnt",v3:"learned/learnt",t:"o'rganmoq"},{v1:"leave",v2:"left",v3:"left",t:"tark etmoq"},{v1:"lend",v2:"lent",v3:"lent",t:"qarz bermoq"},{v1:"let",v2:"let",v3:"let",t:"ruxsat bermoq"},{v1:"lie",v2:"lay",v3:"lain",t:"yotmoq"},{v1:"lose",v2:"lost",v3:"lost",t:"yo'qotmoq"},{v1:"make",v2:"made",v3:"made",t:"qilmoq"},{v1:"mean",v2:"meant",v3:"meant",t:"ma'no bildirmoq"},{v1:"meet",v2:"met",v3:"met",t:"uchrashmoq"},{v1:"pay",v2:"paid",v3:"paid",t:"to'lamoq"},{v1:"put",v2:"put",v3:"put",t:"qo'ymoq"},{v1:"read",v2:"read",v3:"read",t:"o'qimoq"},{v1:"ride",v2:"rode",v3:"ridden",t:"minmoq"},{v1:"ring",v2:"rang",v3:"rung",t:"jiringlamoq"},{v1:"run",v2:"ran",v3:"run",t:"yugurmoq"},{v1:"say",v2:"said",v3:"said",t:"aytmoq"},{v1:"see",v2:"saw",v3:"seen",t:"ko'rmoq"},{v1:"sell",v2:"sold",v3:"sold",t:"sotmoq"},{v1:"send",v2:"sent",v3:"sent",t:"jo'natmoq"},{v1:"shine",v2:"shone",v3:"shone",t:"charaqlamoq"},{v1:"show",v2:"showed",v3:"shown",t:"ko'rsatmoq"},{v1:"shut",v2:"shut",v3:"shut",t:"yopmoq"},{v1:"sing",v2:"sang",v3:"sung",t:"kuylamoq"},{v1:"sit",v2:"sat",v3:"sat",t:"o'tirmoq"},{v1:"sleep",v2:"slept",v3:"slept",t:"uxlamoq"},{v1:"smell",v2:"smelled/smelt",v3:"smelled/smelt",t:"hidlamoq"},{v1:"speak",v2:"spoke",v3:"spoken",t:"gapirmoq"},{v1:"spend",v2:"spent",v3:"spent",t:"sarflamoq"},{v1:"spill",v2:"spilled/spilt",v3:"spilled/spilt",t:"to'kmoq"},{v1:"stand",v2:"stood",v3:"stood",t:"turmoq"},{v1:"swim",v2:"swam",v3:"swum",t:"suzmoq"},{v1:"take",v2:"took",v3:"taken",t:"olmoq"},{v1:"teach",v2:"taught",v3:"taught",t:"o'rgatmoq"},{v1:"tell",v2:"told",v3:"told",t:"aytmoq"},{v1:"think",v2:"thought",v3:"thought",t:"o'ylamoq"},{v1:"throw",v2:"threw",v3:"thrown",t:"uloqtirmoq"},{v1:"understand",v2:"understood",v3:"understood",t:"tushunmoq"},{v1:"wake",v2:"woke",v3:"woken",t:"uyqudan turmoq"},{v1:"wear",v2:"wore",v3:"worn",t:"kiymoq"},{v1:"win",v2:"won",v3:"won",t:"yutmoq"},{v1:"write",v2:"wrote",v3:"written",t:"yozmoq"}
+{v1:"be",v2:"was/were",v3:"been",t:"bo'lmoq"},
+{v1:"become",v2:"became",v3:"become",t:"aylanmoq"},
+{v1:"begin",v2:"began",v3:"begun",t:"boshlamoq"},
+{v1:"break",v2:"broke",v3:"broken",t:"sindirmoq"},
+{v1:"bring",v2:"brought",v3:"brought",t:"olib kelmoq"},
+{v1:"build",v2:"built",v3:"built",t:"qurmoq"},
+{v1:"buy",v2:"bought",v3:"bought",t:"sotib olmoq"},
+{v1:"catch",v2:"caught",v3:"caught",t:"tutmoq"},
+{v1:"come",v2:"came",v3:"come",t:"kelmoq"},
+{v1:"cut",v2:"cut",v3:"cut",t:"kesmoq"},
+{v1:"do",v2:"did",v3:"done",t:"bajarmoq"},
+{v1:"drink",v2:"drank",v3:"drunk",t:"ichmoq"},
+{v1:"drive",v2:"drove",v3:"driven",t:"haydamoq"},
+{v1:"eat",v2:"ate",v3:"eaten",t:"yemoq"},
+{v1:"fall",v2:"fell",v3:"fallen",t:"yiqilmoq"},
+{v1:"find",v2:"found",v3:"found",t:"topmoq"},
+{v1:"forget",v2:"forgot",v3:"forgotten",t:"unutmoq"},
+{v1:"get",v2:"got",v3:"got",t:"olmoq"},
+{v1:"give",v2:"gave",v3:"given",t:"bermoq"},
+{v1:"go",v2:"went",v3:"gone",t:"bormoq"},
+{v1:"have",v2:"had",v3:"had",t:"ega bo'lmoq"},
+{v1:"know",v2:"knew",v3:"known",t:"bilmoq"},
+{v1:"leave",v2:"left",v3:"left",t:"ketmoq"},
+{v1:"make",v2:"made",v3:"made",t:"yasamoq"},
+{v1:"meet",v2:"met",v3:"met",t:"uchrashmoq"},
+{v1:"put",v2:"put",v3:"put",t:"qo'ymoq"},
+{v1:"read",v2:"read",v3:"read",t:"o'qimoq"},
+{v1:"run",v2:"ran",v3:"run",t:"yugurmoq"},
+{v1:"say",v2:"said",v3:"said",t:"aytmoq"},
+{v1:"see",v2:"saw",v3:"seen",t:"ko'rmoq"},
+{v1:"sell",v2:"sold",v3:"sold",t:"sotmoq"},
+{v1:"send",v2:"sent",v3:"sent",t:"jo'natmoq"},
+{v1:"sit",v2:"sat",v3:"sat",t:"o'tirmoq"},
+{v1:"sleep",v2:"slept",v3:"slept",t:"uxlamoq"},
+{v1:"speak",v2:"spoke",v3:"spoken",t:"gapirmoq"},
+{v1:"spend",v2:"spent",v3:"spent",t:"sarflamoq"},
+{v1:"stand",v2:"stood",v3:"stood",t:"turmoq"},
+{v1:"swim",v2:"swam",v3:"swum",t:"suzmoq"},
+{v1:"take",v2:"took",v3:"taken",t:"olmoq"},
+{v1:"teach",v2:"taught",v3:"taught",t:"o'rgatmoq"},
+{v1:"tell",v2:"told",v3:"told",t:"aytmoq"},
+{v1:"think",v2:"thought",v3:"thought",t:"o'ylamoq"},
+{v1:"understand",v2:"understood",v3:"understood",t:"tushunmoq"},
+{v1:"wear",v2:"wore",v3:"worn",t:"kiymoq"},
+{v1:"win",v2:"won",v3:"won",t:"yutmoq"},
+{v1:"write",v2:"wrote",v3:"written",t:"yozmoq"}
 ];
 
-/* ========== GAME VARIABLES ========== */
-let allQuestions = [], questions = [], current = 0, score = 0, lives = 3, time = 8, timer = null, gameActive = true;
-let userName = "Player", userId = "guest";
+/* ==================================================
+   GAME VARIABLES
+================================================== */
+let allQuestions = [];
+let questions = [];
+let current = 0;
+let score = 0;
+let lives = 3;
+let time = 8;
+let timer = null;
+let gameActive = true;
 
-/* ========== UI ========== */
+let userId = "guest";
+let userName = "Player";
+
+/* ==================================================
+   HELPERS
+================================================== */
 function $(id){ return document.getElementById(id); }
-function notify(text,type="success"){ const n=document.createElement("div"); n.className="notification "+type; n.innerText=text; document.body.appendChild(n); setTimeout(()=>n.remove(),1800); }
 
-/* ========== USER ========== */
+function notify(text,type="success"){
+  const n = document.createElement("div");
+  n.className = "notification " + type;
+  n.innerText = text;
+  document.body.appendChild(n);
+  setTimeout(()=>n.remove(),1800);
+}
+
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]] = [arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* ==================================================
+   USER
+================================================== */
 async function loadUserName(){
-    if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-        const user = tg.initDataUnsafe.user;
-        userId = "tg_" + user.id;
-        const tgName = user.first_name || "";
-        const lastName = user.last_name ? " " + user.last_name : "";
-        const defaultName = tgName + lastName || "Player";
-        
-        if (db) {
-            try {
-                const { data } = await db.from("leaderboard").select("user_name").eq("user_id", userId).order("created_at", { ascending: false }).limit(1);
-                if (data && data.length > 0 && data[0].user_name && data[0].user_name !== "Player") {
-                    userName = data[0].user_name;
-                    return;
-                }
-            } catch(e) {}
-        }
-        userName = defaultName;
-    }
-    
-    if (userName === "Player" || userName === "") {
-        const name = prompt("🏆 Reytingda ko'rinishi uchun ismingizni kiriting:", "");
-        if (name && name.trim()) { userName = name.trim(); }
-        else { const names = ["O'quvchi", "Student", "Learner"]; userName = names[Math.floor(Math.random() * names.length)] + "_" + Math.floor(Math.random() * 100); }
-    }
+  if(tg.initDataUnsafe?.user){
+    const u = tg.initDataUnsafe.user;
+    userId = "tg_" + u.id;
+    userName = (u.first_name || "Player") + (u.last_name ? " " + u.last_name : "");
+  }else{
+    const name = prompt("Ismingiz:");
+    userName = name?.trim() || "Player_" + Math.floor(Math.random()*1000);
+    userId = "guest_" + Math.floor(Math.random()*999999);
+  }
 }
 
-/* ========== SAVOLLAR ========== */
-function buildQuestions(){ allQuestions = []; verbsList.forEach(v=>{ allQuestions.push({verb:v.v1,trans:v.t,ask:"V2 (Past Simple)",correct:v.v2}); allQuestions.push({verb:v.v1,trans:v.t,ask:"V3 (Past Participle)",correct:v.v3}); }); }
-function shuffleArray(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
-
-/* ========== TAYMER ========== */
-function startTimer(){ clearInterval(timer); time=8; $("timer").innerText="⏱️ "+time+"s"; $("timer").style.color="#2a9d8f"; timer=setInterval(()=>{ time--; $("timer").innerText="⏱️ "+time+"s"; if(time<=3)$("timer").style.color="#e76f51"; if(time<=0){ clearInterval(timer); if(!gameActive)return; lives--; updateLives(); notify("⏰ Vaqt tugadi!","error"); if(lives<=0)endGame(); else{current++;loadQuestion();} } },1000); }
-function updateLives(){ $("lives").innerText=lives; }
-
-/* ========== SAVOL ========== */
-function loadQuestion(){ if(!gameActive)return; if(current>=questions.length){endGame(true);return;} const q=questions[current]; $("verb").innerText=q.verb; $("translation").innerText=q.trans; $("question").innerText=q.ask; $("answer").value=""; $("progress").innerText=(current+1)+" / "+questions.length; $("answer").focus(); startTimer(); }
-
-/* ========== JAVOB ========== */
-function checkAnswer(){ if(!gameActive)return; const q=questions[current]; const ans=$("answer").value.trim().toLowerCase(); const correctAnswers=q.correct.toLowerCase().split('/'); const isCorrect=correctAnswers.some(c=>ans===c.trim()); clearInterval(timer); if(isCorrect){ score++; const bonus=Math.floor(time/2); if(bonus>0){score+=bonus;notify("✅ To'g'ri! +1 +"+bonus+" bonus","success");} else notify("✅ To'g'ri! +1","success"); $("score").innerText=score; current++; loadQuestion(); } else { lives--; updateLives(); notify("❌ "+q.correct,"error"); if(lives<=0)endGame(); else{current++;loadQuestion();} } }
-function skipQuestion(){ if(!gameActive)return; clearInterval(timer); lives--; updateLives(); notify("⏭️ Skip","error"); if(lives<=0)endGame(); else{current++;loadQuestion();} }
-
-/* ========== YANGI XABAR ========== */
-async function createNewMessage(message, inlineKeyboard){
-    const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ chat_id: CHANNEL_ID, text: message, reply_markup: inlineKeyboard })
+/* ==================================================
+   QUESTIONS
+================================================== */
+function buildQuestions(){
+  allQuestions = [];
+  verbsList.forEach(v=>{
+    allQuestions.push({
+      verb:v.v1,
+      trans:v.t,
+      ask:"V2 (Past Simple)",
+      correct:v.v2
     });
-    const result = await response.json();
-    if(result.ok && result.result){
-        const messageId = result.result.message_id;
-        await db.from("config").upsert({ key: "leaderboard_msg", message_id: messageId });
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`,{
-            method:"POST", headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({ chat_id: CHANNEL_ID, message_id: messageId, disable_notification: true })
-        });
-    }
-}
 
-/* ========== LEADERBOARD YANGILASH ========== */
-async function updateLeaderboardMessage(){
-if(!db) return;
-try{
-    const { data: allPlayers } = await db.from("leaderboard").select("user_name, user_id, score").order("score", { ascending: false });
-    if(!allPlayers || allPlayers.length===0) return;
-    
-    const bestScores = new Map();
-    for(let p of allPlayers) {
-        if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score) {
-            bestScores.set(p.user_id, { name: p.user_name, score: p.score });
-        }
-    }
-    
-    const sortedPlayers = Array.from(bestScores.values()).sort((a, b) => b.score - a.score).slice(0, 10);
-    
-    let message = "🏆 TOP 10 O'YINCHILAR\n\n";
-    sortedPlayers.forEach((p, i) => {
-        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i+1}.`;
-        message += `${medal} ${p.name}: ${p.score} ball\n`;
+    allQuestions.push({
+      verb:v.v1,
+      trans:v.t,
+      ask:"V3 (Past Participle)",
+      correct:v.v3
     });
-    if (sortedPlayers.length < 10) message += `\n${10 - sortedPlayers.length} ta bo'sh o'rin`;
-    message += `\n🔄 Yangilandi: ${new Date().toLocaleTimeString('uz-UZ')}`;
-    
-    const inlineKeyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
-    const { data: configData } = await db.from("config").select("message_id").eq("key","leaderboard_msg").single();
-    
-    if(configData && configData.message_id){
-        const editResult = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,{
-            method:"POST", headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({ chat_id: CHANNEL_ID, message_id: configData.message_id, text: message, reply_markup: inlineKeyboard })
-        });
-        const editJson = await editResult.json();
-        if(!editJson.ok) await createNewMessage(message, inlineKeyboard);
-    } else {
-        await createNewMessage(message, inlineKeyboard);
+  });
+}
+
+/* ==================================================
+   TIMER
+================================================== */
+function startTimer(){
+  clearInterval(timer);
+  time = 8;
+  $("timer").innerText = "⏱️ " + time + "s";
+
+  timer = setInterval(()=>{
+    time--;
+    $("timer").innerText = "⏱️ " + time + "s";
+
+    if(time <= 3) $("timer").style.color = "#e76f51";
+
+    if(time <= 0){
+      clearInterval(timer);
+      lives--;
+      updateLives();
+      notify("⏰ Vaqt tugadi","error");
+
+      if(lives <= 0) endGame();
+      else{
+        current++;
+        loadQuestion();
+      }
     }
-}catch(e){ console.log("Leaderboard xatosi:", e); }
+  },1000);
 }
 
-/* ========== O'YIN TUGADI ========== */
-async function endGame(completed=false){
-clearInterval(timer); gameActive=false;
-$("gameScreen").style.display="none"; $("gameOverScreen").style.display="block";
-$("finalScore").innerText=score;
-
-let finalMessage = completed ? `🎉 Barcha ${questions.length} savol!` : `${current}/${questions.length} savol`;
-
-if(db){
-try{
-    const { data: best } = await db.from("leaderboard").select("score").eq("user_id", userId).order("score", { ascending: false }).limit(1);
-    const prevBest = best && best.length>0 ? best[0].score : 0;
-    
-    await db.from("leaderboard").insert([{ user_id: userId, user_name: userName, score: score, questions_answered: current, created_at: new Date().toISOString() }]);
-    
-    if(prevBest === 0) finalMessage = "🆕 Birinchi o'yin! " + finalMessage;
-    else if(score > prevBest) finalMessage = "🏆 YANGI REKORD! " + finalMessage;
-    else finalMessage = "📊 " + finalMessage + "\nEng yaxshi: " + prevBest;
-}catch(e){}
+function updateLives(){
+  $("lives").innerText = lives;
 }
 
-$("finalText").innerText = finalMessage;
-await updateLeaderboardMessage();
+/* ==================================================
+   LOAD QUESTION
+================================================== */
+function loadQuestion(){
+  if(current >= questions.length){
+    endGame(true);
+    return;
+  }
+
+  const q = questions[current];
+
+  $("verb").innerText = q.verb;
+  $("translation").innerText = q.trans;
+  $("question").innerText = q.ask;
+  $("progress").innerText = (current+1) + " / " + questions.length;
+  $("answer").value = "";
+  $("answer").focus();
+
+  startTimer();
 }
 
-/* ========== REYTING EKRANI ========== */
+/* ==================================================
+   ANSWER
+================================================== */
+function checkAnswer(){
+  const q = questions[current];
+  const ans = $("answer").value.trim().toLowerCase();
+
+  const valid = q.correct.toLowerCase().split("/");
+  const ok = valid.some(x => x.trim() === ans);
+
+  clearInterval(timer);
+
+  if(ok){
+    score++;
+    score += Math.floor(time/2);
+    $("score").innerText = score;
+    notify("✅ To'g'ri");
+  }else{
+    lives--;
+    updateLives();
+    notify("❌ " + q.correct,"error");
+  }
+
+  if(lives <= 0){
+    endGame();
+    return;
+  }
+
+  current++;
+  loadQuestion();
+}
+
+function skipQuestion(){
+  clearInterval(timer);
+  lives--;
+  updateLives();
+  notify("⏭️ Skip","error");
+
+  if(lives <= 0){
+    endGame();
+    return;
+  }
+
+  current++;
+  loadQuestion();
+}
+
+/* ==================================================
+   SAVE BEST SCORE ONLY
+================================================== */
+async function saveBestScore(){
+  if(!db) return 0;
+
+  try{
+    const { data: old } = await db
+      .from("leaderboard")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if(!old){
+      await db.from("leaderboard").insert({
+        user_id:userId,
+        user_name:userName,
+        score:score,
+        updated_at:new Date().toISOString()
+      });
+      return score;
+    }
+
+    if(score > old.score){
+      await db.from("leaderboard")
+        .update({
+          user_name:userName,
+          score:score,
+          updated_at:new Date().toISOString()
+        })
+        .eq("user_id", userId);
+
+      return score;
+    }
+
+    return old.score;
+
+  }catch(e){
+    console.log(e);
+    return 0;
+  }
+}
+
+/* ==================================================
+   TOP 10 TEXT
+================================================== */
+async function getTop10Text(){
+  const { data, error } = await db
+    .from("leaderboard")
+    .select("user_name,score")
+    .order("score",{ascending:false})
+    .limit(10);
+
+  if(error || !data) return "Hali o'yinchi yo'q";
+
+  let text = "🏆 TOP 10 O'YINCHILAR\n\n";
+
+  data.forEach((p,i)=>{
+    const medal =
+      i===0 ? "🥇" :
+      i===1 ? "🥈" :
+      i===2 ? "🥉" : (i+1)+".";
+
+    text += `${medal} ${p.user_name} - ${p.score}\n`;
+  });
+
+  text += "\n🎮 Pastdagi tugmadan o'ynang!";
+  return text;
+}
+
+/* ==================================================
+   TELEGRAM MESSAGE UPDATE
+================================================== */
+async function updateTelegramLeaderboard(){
+  if(!db) return;
+
+  try{
+    const text = await getTop10Text();
+
+    const keyboard = {
+      inline_keyboard:[
+        [{ text:"🎮 O'yinni boshlash", url:GAME_URL }]
+      ]
+    };
+
+    const { data: cfg } = await db
+      .from("config")
+      .select("*")
+      .eq("key","leaderboard_msg")
+      .maybeSingle();
+
+    // message yo'q bo'lsa create
+    if(!cfg || !cfg.value){
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({
+          chat_id:CHANNEL_ID,
+          text:text,
+          reply_markup:keyboard
+        })
+      });
+
+      const json = await res.json();
+
+      if(json.ok){
+        await db.from("config").upsert({
+          key:"leaderboard_msg",
+          value:String(json.result.message_id)
+        });
+      }
+
+      return;
+    }
+
+    // edit existing
+    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        chat_id:CHANNEL_ID,
+        message_id:Number(cfg.value),
+        text:text,
+        reply_markup:keyboard
+      })
+    });
+
+  }catch(e){
+    console.log(e);
+  }
+}
+
+/* ==================================================
+   GAME OVER
+================================================== */
+async function endGame(done=false){
+  clearInterval(timer);
+  gameActive = false;
+
+  $("gameScreen").style.display = "none";
+  $("gameOverScreen").style.display = "block";
+  $("finalScore").innerText = score;
+
+  const best = await saveBestScore();
+
+  $("finalText").innerText =
+    done
+    ? `🎉 Tugatdingiz!\nBest score: ${best}`
+    : `📊 Best score: ${best}`;
+
+  await updateTelegramLeaderboard();
+}
+
+/* ==================================================
+   LEADERBOARD SCREEN
+================================================== */
 async function showLeaderboard(){
-$("gameScreen").style.display="none"; $("gameOverScreen").style.display="none"; $("leaderboardScreen").style.display="block";
-const list=$("leaderboardList"); list.innerHTML="Yuklanmoqda...";
-if(!db){list.innerHTML="Ulanish yo'q";return;}
-try{ 
-    const { data: all } = await db.from("leaderboard").select("user_name, user_id, score").order("score",{ascending:false});
-    if(!all||all.length===0){list.innerHTML="Hali o'yinchi yo'q";return;}
-    const bestScores = new Map();
-    for(let p of all) { if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score) bestScores.set(p.user_id, { name: p.user_name, score: p.score }); }
-    const sorted = Array.from(bestScores.values()).sort((a,b)=>b.score-a.score).slice(0,10);
-    let html=""; 
-    sorted.forEach((p,i)=>{ const m=i===0?"🥇":i===1?"🥈":i===2?"🥉":`${i+1}.`; html+=`<div style="padding:12px;background:#333;margin:5px 0;border-radius:12px;"><strong>${m}</strong> ${p.name}: ${p.score} ball</div>`; });
-    if(sorted.length<10) html+=`<div style="padding:12px;background:#222;margin:5px 0;border-radius:12px;color:#aaa;text-align:center;">${10-sorted.length} ta bo'sh o'rin</div>`;
-    list.innerHTML=html;
-}catch(e){list.innerHTML="Xatolik";}
-}
-function hideLeaderboard(){ $("leaderboardScreen").style.display="none"; if(gameActive)$("gameScreen").style.display="block"; else $("gameOverScreen").style.display="block"; }
+  $("gameScreen").style.display = "none";
+  $("gameOverScreen").style.display = "none";
+  $("leaderboardScreen").style.display = "block";
 
-/* ========== RESTART ========== */
+  const box = $("leaderboardList");
+  box.innerHTML = "Yuklanmoqda...";
+
+  if(!db){
+    box.innerHTML = "Database ulanmagan";
+    return;
+  }
+
+  const { data } = await db
+    .from("leaderboard")
+    .select("user_name,score")
+    .order("score",{ascending:false})
+    .limit(10);
+
+  if(!data || data.length===0){
+    box.innerHTML = "Hali o'yinchi yo'q";
+    return;
+  }
+
+  let html = "";
+
+  data.forEach((p,i)=>{
+    const medal =
+      i===0 ? "🥇" :
+      i===1 ? "🥈" :
+      i===2 ? "🥉" : (i+1)+".";
+
+    html += `
+      <div style="padding:12px;background:#333;margin:6px 0;border-radius:12px">
+        <strong>${medal}</strong> ${p.user_name} - ${p.score}
+      </div>
+    `;
+  });
+
+  box.innerHTML = html;
+}
+
+function hideLeaderboard(){
+  $("leaderboardScreen").style.display = "none";
+
+  if(gameActive) $("gameScreen").style.display = "block";
+  else $("gameOverScreen").style.display = "block";
+}
+
+/* ==================================================
+   RESTART
+================================================== */
 async function restartGame(){
-clearInterval(timer); score=0; lives=3; current=0; gameActive=true;
-$("score").innerText="0"; $("lives").innerText="3";
-$("gameOverScreen").style.display="none"; $("leaderboardScreen").style.display="none"; $("gameScreen").style.display="block";
-buildQuestions(); questions=shuffleArray([...allQuestions]);
-await loadUserName();
-loadQuestion();
+  clearInterval(timer);
+
+  score = 0;
+  lives = 3;
+  current = 0;
+  gameActive = true;
+
+  $("score").innerText = "0";
+  $("lives").innerText = "3";
+
+  $("gameOverScreen").style.display = "none";
+  $("leaderboardScreen").style.display = "none";
+  $("gameScreen").style.display = "block";
+
+  buildQuestions();
+  questions = shuffle([...allQuestions]);
+
+  loadQuestion();
 }
 
-/* ========== EVENTLAR ========== */
-$("checkBtn").addEventListener("click",checkAnswer);
-$("skipBtn").addEventListener("click",skipQuestion);
-$("restartBtn").addEventListener("click",restartGame);
-$("leaderboardBtn").addEventListener("click",showLeaderboard);
-$("playAgainBtn").addEventListener("click",restartGame);
-$("viewLeaderboardBtn").addEventListener("click",showLeaderboard);
-$("backBtn").addEventListener("click",hideLeaderboard);
-$("answer").addEventListener("keypress",e=>{if(e.key==="Enter")checkAnswer();});
+/* ==================================================
+   EVENTS
+================================================== */
+$("checkBtn").onclick = checkAnswer;
+$("skipBtn").onclick = skipQuestion;
+$("restartBtn").onclick = restartGame;
+$("leaderboardBtn").onclick = showLeaderboard;
+$("playAgainBtn").onclick = restartGame;
+$("viewLeaderboardBtn").onclick = showLeaderboard;
+$("backBtn").onclick = hideLeaderboard;
 
-/* ========== START ========== */
+$("answer").addEventListener("keypress",(e)=>{
+  if(e.key==="Enter") checkAnswer();
+});
+
+/* ==================================================
+   START
+================================================== */
 (async function(){
-buildQuestions();
-questions = shuffleArray([...allQuestions]);
-await loadUserName();
-loadQuestion();
+  await loadUserName();
+  buildQuestions();
+  questions = shuffle([...allQuestions]);
+  loadQuestion();
 })();
 </script>
 </body>
