@@ -90,123 +90,315 @@ const BOT_TOKEN = "8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo";
 const CHANNEL_ID = "@englishcodebyshaxzod";
 const GAME_URL = "https://irregular-verbs-game-alpha.vercel.app"; // <-- O'Z URL'INGIZ
 
-/* ========== FE'LLAR (20 ta) ========== */
+/* ========== FE'LLAR ========== */
 const verbsList = [
 {v1:"go",v2:"went",v3:"gone",t:"bormoq"},{v1:"come",v2:"came",v3:"come",t:"kelmoq"},{v1:"eat",v2:"ate",v3:"eaten",t:"yemoq"},{v1:"write",v2:"wrote",v3:"written",t:"yozmoq"},{v1:"see",v2:"saw",v3:"seen",t:"ko'rmoq"},{v1:"take",v2:"took",v3:"taken",t:"olmoq"},{v1:"give",v2:"gave",v3:"given",t:"bermoq"},{v1:"know",v2:"knew",v3:"known",t:"bilmoq"},{v1:"speak",v2:"spoke",v3:"spoken",t:"gapirmoq"},{v1:"begin",v2:"began",v3:"begun",t:"boshlamoq"},{v1:"drink",v2:"drank",v3:"drunk",t:"ichmoq"},{v1:"drive",v2:"drove",v3:"driven",t:"haydamoq"},{v1:"break",v2:"broke",v3:"broken",t:"sindirmoq"},{v1:"buy",v2:"bought",v3:"bought",t:"sotib olmoq"},{v1:"bring",v2:"brought",v3:"brought",t:"olib kelmoq"},{v1:"teach",v2:"taught",v3:"taught",t:"o'rgatmoq"},{v1:"think",v2:"thought",v3:"thought",t:"o'ylamoq"},{v1:"find",v2:"found",v3:"found",t:"topmoq"},{v1:"fall",v2:"fell",v3:"fallen",t:"yiqilmoq"},{v1:"be",v2:"was/were",v3:"been",t:"bo'lmoq"}
 ];
 
 /* ========== GAME VARIABLES ========== */
 let allQuestions = [], questions = [], current = 0, score = 0, lives = 3, time = 8, timer = null, gameActive = true;
-let userName = "Player", userId = "guest";
+let userName = "", userId = "";
 
-/* ========== UI YORDAMCHI ========== */
+/* ========== UI ========== */
 function $(id){ return document.getElementById(id); }
 function notify(text,type="success"){ const n=document.createElement("div"); n.className="notification "+type; n.innerText=text; document.body.appendChild(n); setTimeout(()=>n.remove(),1800); }
 
-/* ========== USER ========== */
+/* ========== USER (ISMRNI BIR MARTA SO'RASH) ========== */
 async function loadUserName(){
+    // Avval localStorage'dan tekshirish
+    const savedName = localStorage.getItem('verbGame_playerName');
+    const savedId = localStorage.getItem('verbGame_userId');
+    
+    if(savedName && savedId){
+        userName = savedName;
+        userId = savedId;
+        return;
+    }
+    
+    // Telegram orqali olish
     if(tg.initDataUnsafe && tg.initDataUnsafe.user){
         const u = tg.initDataUnsafe.user;
         userId = "tg_" + u.id;
         const full = ((u.first_name || "") + " " + (u.last_name || "")).trim();
-        userName = full || u.username || "Player";
-    } else {
-        let name = prompt("Ismingizni kiriting:");
-        if(!name || !name.trim()) name = "Guest_" + Math.floor(Math.random()*1000);
-        userName = name.trim();
-        userId = "guest_" + Date.now();
+        userName = full || u.username || "";
     }
+    
+    // Agar ism bo'sh bo'lsa yoki "Player" bo'lsa, so'rash
+    if(!userName || userName === "Player" || userName === ""){
+        let name = prompt("🏆 Reytingda ko'rinishi uchun ismingizni kiriting:", "");
+        if(!name || !name.trim()){
+            const names = ["O'quvchi", "Student", "Learner", "Pupil"];
+            name = names[Math.floor(Math.random() * names.length)] + "_" + Math.floor(Math.random() * 100);
+        }
+        userName = name.trim();
+    }
+    
+    // Agar userId bo'sh bo'lsa, yaratish
+    if(!userId){
+        userId = "guest_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+    }
+    
+    // localStorage'ga saqlash
+    localStorage.setItem('verbGame_playerName', userName);
+    localStorage.setItem('verbGame_userId', userId);
 }
 
 /* ========== SAVOLLAR ========== */
-function buildQuestions(){ allQuestions = []; verbsList.forEach(v=>{ allQuestions.push({verb:v.v1,trans:v.t,ask:"V2 shaklini yozing",correct:v.v2}); allQuestions.push({verb:v.v1,trans:v.t,ask:"V3 shaklini yozing",correct:v.v3}); }); }
+function buildQuestions(){ 
+    allQuestions = []; 
+    verbsList.forEach(v=>{ 
+        allQuestions.push({verb:v.v1, trans:v.t, ask:"V2 shaklini yozing", correct:v.v2}); 
+        allQuestions.push({verb:v.v1, trans:v.t, ask:"V3 shaklini yozing", correct:v.v3}); 
+    }); 
+}
 function shuffleArray(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
 /* ========== TAYMER ========== */
-function startTimer(){ clearInterval(timer); time=8; $("timer").innerText="⏱️ "+time+"s"; $("timer").style.color="#2a9d8f"; timer=setInterval(()=>{ time--; $("timer").innerText="⏱️ "+time+"s"; if(time<=3)$("timer").style.color="#e76f51"; if(time<=0){ clearInterval(timer); if(!gameActive)return; lives--; updateLives(); notify("⏰ Vaqt tugadi!","error"); if(lives<=0)endGame(); else{current++;loadQuestion();} } },1000); }
+function startTimer(){ 
+    clearInterval(timer); 
+    time=8; 
+    $("timer").innerText="⏱️ "+time+"s"; 
+    $("timer").style.color="#2a9d8f"; 
+    timer=setInterval(()=>{ 
+        time--; 
+        $("timer").innerText="⏱️ "+time+"s"; 
+        if(time<=3) $("timer").style.color="#e76f51"; 
+        if(time<=0){ 
+            clearInterval(timer); 
+            if(!gameActive) return; 
+            lives--; 
+            updateLives(); 
+            notify("⏰ Vaqt tugadi!","error"); 
+            if(lives<=0) endGame(); 
+            else{ current++; loadQuestion(); } 
+        } 
+    },1000); 
+}
 function updateLives(){ $("lives").innerText=lives; }
 
-/* ========== SAVOL ========== */
-function loadQuestion(){ if(!gameActive)return; if(current>=questions.length){endGame(true);return;} const q=questions[current]; $("verb").innerText=q.verb; $("translation").innerText=q.trans; $("question").innerText=q.ask; $("progress").innerText=(current+1)+" / "+questions.length; $("answer").value=""; $("answer").focus(); startTimer(); }
-
-/* ========== JAVOB ========== */
-function checkAnswer(){ if(!gameActive)return; const q=questions[current]; const ans=$("answer").value.trim().toLowerCase(); const valid=q.correct.toLowerCase().split('/'); clearInterval(timer); if(valid.includes(ans)){ score++; score+=Math.floor(time/2); $("score").innerText=score; notify("✅ To'g'ri"); } else { lives--; updateLives(); notify("❌ "+q.correct,"error"); } if(lives<=0){ endGame(); return; } current++; loadQuestion(); }
-function skipQuestion(){ if(!gameActive)return; clearInterval(timer); lives--; updateLives(); notify("⏭️ Skip","error"); if(lives<=0){ endGame(); return; } current++; loadQuestion(); }
-
-/* ========== LEADERBOARD YORDAMCHI ========== */
-async function getTop10(){
-    const { data } = await db.from("leaderboard").select("user_name, user_id, score").order("score", { ascending: false });
-    if(!data || data.length===0) return [];
-    const bestScores = new Map();
-    for(let p of data){ if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score) bestScores.set(p.user_id, { user_name: p.user_name, score: p.score }); }
-    return Array.from(bestScores.values()).sort((a,b)=>b.score-a.score).slice(0,10);
+/* ========== SAVOL YUKLASH ========== */
+function loadQuestion(){ 
+    if(!gameActive) return; 
+    if(current >= questions.length){ endGame(true); return; } 
+    const q = questions[current]; 
+    $("verb").innerText = q.verb; 
+    $("translation").innerText = q.trans; 
+    $("question").innerText = q.ask; 
+    $("progress").innerText = (current+1) + " / " + questions.length; 
+    $("answer").value = ""; 
+    $("answer").focus(); 
+    startTimer(); 
 }
 
-async function saveBestScore(){
-    const { data: old } = await db.from("leaderboard").select("score").eq("user_id",userId).order("score",{ascending:false}).limit(1);
-    const prevBest = (old && old.length>0) ? old[0].score : 0;
-    await db.from("leaderboard").insert({ user_id:userId, user_name:userName, score:score, created_at:new Date().toISOString() });
+/* ========== JAVOBNI TEKSHIRISH ========== */
+function checkAnswer(){ 
+    if(!gameActive) return; 
+    const q = questions[current]; 
+    const ans = $("answer").value.trim().toLowerCase(); 
+    const valid = q.correct.toLowerCase().split('/'); 
+    clearInterval(timer); 
+    if(valid.includes(ans)){ 
+        score++; 
+        score += Math.floor(time/2); 
+        $("score").innerText = score; 
+        notify("✅ To'g'ri"); 
+    } else { 
+        lives--; 
+        updateLives(); 
+        notify("❌ " + q.correct, "error"); 
+    } 
+    if(lives <= 0){ 
+        endGame(); 
+        return; 
+    } 
+    current++; 
+    loadQuestion(); 
+}
+
+function skipQuestion(){ 
+    if(!gameActive) return; 
+    clearInterval(timer); 
+    lives--; 
+    updateLives(); 
+    notify("⏭️ Skip", "error"); 
+    if(lives <= 0){ 
+        endGame(); 
+        return; 
+    } 
+    current++; 
+    loadQuestion(); 
+}
+
+/* ========== LEADERBOARD: TOP 10 (TAKRORIY ISMLARSIZ) ========== */
+async function getTop10(){
+    const { data } = await db
+        .from("leaderboard")
+        .select("user_name, user_id, score")
+        .order("score", { ascending: false });
+    
+    if(!data || data.length === 0) return [];
+    
+    // Har bir user_id uchun faqat eng yuqori ball
+    const bestScores = new Map();
+    for(let p of data){
+        if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score){
+            bestScores.set(p.user_id, { user_name: p.user_name, score: p.score });
+        }
+    }
+    
+    return Array.from(bestScores.values())
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 10);
+}
+
+/* ========== NATIJANI SAQLASH (UPSERT) ========== */
+async function saveScore(){
+    if(!userId || !userName) return 0;
+    
+    // Avvalgi eng yaxshi ballni tekshirish
+    const { data: old } = await db
+        .from("leaderboard")
+        .select("score")
+        .eq("user_id", userId)
+        .maybeSingle();
+    
+    const prevBest = old ? old.score : 0;
+    
+    // UPSERT: mavjud bo'lsa yangilash, bo'lmasa qo'shish
+    if(old){
+        if(score > prevBest){
+            await db.from("leaderboard")
+                .update({ user_name: userName, score: score, updated_at: new Date().toISOString() })
+                .eq("user_id", userId);
+        }
+    } else {
+        await db.from("leaderboard")
+            .insert({ user_id: userId, user_name: userName, score: score, created_at: new Date().toISOString() });
+    }
+    
     return Math.max(score, prevBest);
 }
 
-/* ========== TELEGRAM XABAR YANGILASH ========== */
+/* ========== TELEGRAM XABARINI YANGILASH (EDIT) ========== */
+let isUpdating = false;
 async function updateTelegramLeaderboard(){
-    const top = await getTop10();
-    if(top.length===0) return;
+    if(isUpdating) return;
+    isUpdating = true;
     
-    let text = "🏆 TOP 10 O'YINCHILAR\n\n";
-    top.forEach((p,i)=>{ const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)+"."; text += `${medal} ${p.user_name}: ${p.score} ball\n`; });
-    text += "\n🎮 Pastdagi tugma orqali o'ynang!";
-    
-    const keyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
-    const { data: cfg } = await db.from("config").select("message_id").eq("key","leaderboard_msg").maybeSingle();
-    
-    if(!cfg || !cfg.message_id){
-        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:CHANNEL_ID, text:text, reply_markup:keyboard }) });
-        const json = await res.json();
-        if(json.ok && json.result){
-            await db.from("config").upsert({ key:"leaderboard_msg", message_id: json.result.message_id });
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:CHANNEL_ID, message_id:json.result.message_id, disable_notification:true }) });
+    try{
+        const top = await getTop10();
+        if(top.length === 0){ isUpdating = false; return; }
+        
+        let text = "🏆 TOP 10 O'YINCHILAR\n\n";
+        top.forEach((p, i) => {
+            const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i+1) + ".";
+            text += `${medal} ${p.user_name}: ${p.score} ball\n`;
+        });
+        text += "\n🎮 Pastdagi tugma orqali o'ynang!";
+        
+        const keyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
+        
+        // Config'dan message_id ni olish
+        const { data: cfg } = await db
+            .from("config")
+            .select("message_id")
+            .eq("key", "leaderboard_msg")
+            .maybeSingle();
+        
+        if(cfg && cfg.message_id){
+            // Xabarni tahrirlash
+            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ chat_id: CHANNEL_ID, message_id: cfg.message_id, text: text, reply_markup: keyboard })
+            });
+            const json = await res.json();
+            
+            if(!json.ok){
+                // Xabar o'chirilgan bo'lsa, yangi yaratish
+                console.log("Xabar topilmadi, yangi yaratilmoqda...");
+                await createNewLeaderboardMessage(text, keyboard);
+            }
+        } else {
+            // Yangi xabar yaratish
+            await createNewLeaderboardMessage(text, keyboard);
         }
-        return;
+    } catch(e){
+        console.log("Leaderboard xatosi:", e);
     }
     
-    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:CHANNEL_ID, message_id:cfg.message_id, text:text, reply_markup:keyboard }) });
+    isUpdating = false;
+}
+
+async function createNewLeaderboardMessage(text, keyboard){
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: CHANNEL_ID, text: text, reply_markup: keyboard })
+    });
     const json = await res.json();
-    if(!json.ok){
-        const resend = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:CHANNEL_ID, text:text, reply_markup:keyboard }) });
-        const resendJson = await resend.json();
-        if(resendJson.ok && resendJson.result) await db.from("config").upsert({ key:"leaderboard_msg", message_id: resendJson.result.message_id });
+    
+    if(json.ok && json.result){
+        // Yangi message_id ni saqlash
+        await db.from("config").upsert({ key: "leaderboard_msg", message_id: json.result.message_id });
+        
+        // Pin qilish
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ chat_id: CHANNEL_ID, message_id: json.result.message_id, disable_notification: true })
+        });
     }
 }
 
 /* ========== O'YIN TUGADI ========== */
-async function endGame(completed=false){
-    clearInterval(timer); gameActive=false;
-    $("gameScreen").style.display="none"; $("gameOverScreen").style.display="block";
-    $("finalScore").innerText=score;
-    const best = await saveBestScore();
+async function endGame(completed = false){
+    clearInterval(timer);
+    gameActive = false;
+    
+    $("gameScreen").style.display = "none";
+    $("gameOverScreen").style.display = "block";
+    $("finalScore").innerText = score;
+    
+    const best = await saveScore();
     $("finalText").innerText = completed ? `🎉 Tugatdingiz!\nEng yaxshi: ${best}` : `📊 Eng yaxshi: ${best}`;
+    
     await updateTelegramLeaderboard();
 }
 
 /* ========== REYTING EKRANI ========== */
 async function showLeaderboard(){
-    $("gameScreen").style.display="none"; $("gameOverScreen").style.display="none"; $("leaderboardScreen").style.display="block";
+    $("gameScreen").style.display = "none";
+    $("gameOverScreen").style.display = "none";
+    $("leaderboardScreen").style.display = "block";
+    
     const top = await getTop10();
     let html = "";
-    top.forEach((p,i)=>{ const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)+"."; html += `<div style="padding:12px;background:#333;margin:6px 0;border-radius:12px"><strong>${medal}</strong> ${p.user_name}: ${p.score} ball</div>`; });
+    top.forEach((p, i) => {
+        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i+1) + ".";
+        html += `<div style="padding:12px;background:#333;margin:6px 0;border-radius:12px"><strong>${medal}</strong> ${p.user_name}: ${p.score} ball</div>`;
+    });
     $("leaderboardList").innerHTML = html || "Hali o'yinchi yo'q";
 }
-function hideLeaderboard(){ $("leaderboardScreen").style.display="none"; if(gameActive)$("gameScreen").style.display="block"; else $("gameOverScreen").style.display="block"; }
+
+function hideLeaderboard(){
+    $("leaderboardScreen").style.display = "none";
+    if(gameActive) $("gameScreen").style.display = "block";
+    else $("gameOverScreen").style.display = "block";
+}
 
 /* ========== RESTART ========== */
 async function restartGame(){
-    clearInterval(timer); score=0; lives=3; current=0; gameActive=true;
-    $("score").innerText="0"; $("lives").innerText="3";
-    $("gameOverScreen").style.display="none"; $("leaderboardScreen").style.display="none"; $("gameScreen").style.display="block";
-    buildQuestions(); questions=shuffleArray([...allQuestions]);
-    await loadUserName();
+    clearInterval(timer);
+    score = 0; lives = 3; current = 0; gameActive = true;
+    $("score").innerText = "0";
+    $("lives").innerText = "3";
+    $("gameOverScreen").style.display = "none";
+    $("leaderboardScreen").style.display = "none";
+    $("gameScreen").style.display = "block";
+    
+    buildQuestions();
+    questions = shuffleArray([...allQuestions]);
     loadQuestion();
 }
 
@@ -218,7 +410,7 @@ $("leaderboardBtn").onclick = showLeaderboard;
 $("playAgainBtn").onclick = restartGame;
 $("viewLeaderboardBtn").onclick = showLeaderboard;
 $("backBtn").onclick = hideLeaderboard;
-$("answer").addEventListener("keypress",e=>{ if(e.key==="Enter") checkAnswer(); });
+$("answer").addEventListener("keypress", e => { if(e.key === "Enter") checkAnswer(); });
 
 /* ========== START ========== */
 (async function(){
