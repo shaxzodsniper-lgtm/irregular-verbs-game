@@ -306,10 +306,39 @@ let gameActive = true;
 let userName = "Player";
 let userId = "guest";
 
-if(tg.initDataUnsafe.user){
-userId = tg.initDataUnsafe.user.id;
-userName = tg.initDataUnsafe.user.first_name || "Player";
+// 1-USUL: initDataUnsafe orqali
+if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
+    const user = tg.initDataUnsafe.user;
+    userId = user.id;
+    userName = user.first_name || "Player";
+    if (user.last_name) userName += " " + user.last_name;
+    if (user.username) userName = "@" + user.username;
 }
+
+// 2-USUL: initData stringi orqali (agar 1-usul ishlamasa)
+if (userName === "Player" && tg.initData && tg.initData.length > 0) {
+    try {
+        const params = new URLSearchParams(tg.initData);
+        const userParam = params.get('user');
+        if (userParam) {
+            const user = JSON.parse(userParam);
+            userId = user.id;
+            userName = user.first_name || "Player";
+            if (user.last_name) userName += " " + user.last_name;
+            if (user.username) userName = "@" + user.username;
+        }
+    } catch(e) {
+        console.log("User parse xatosi:", e);
+    }
+}
+
+// 3-USUL: Agar hali ham "Player" bo'lsa, random nom yaratish
+if (userName === "Player") {
+    const randomNames = ["O'quvchi", "Student", "Learner", "Pupil", "User"];
+    userName = randomNames[Math.floor(Math.random() * randomNames.length)] + "_" + Math.floor(Math.random() * 1000);
+}
+
+console.log("Foydalanuvchi:", userName, "ID:", userId);
 
 /* ========== UI YORDAMCHI ========== */
 function $(id){ return document.getElementById(id); }
