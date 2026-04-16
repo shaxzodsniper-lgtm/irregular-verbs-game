@@ -95,7 +95,6 @@ padding:14px;
 font-size:18px;
 border:none;
 border-radius:14px;
-margin-bottom:10px;
 cursor:pointer;
 font-weight:bold;
 }
@@ -131,6 +130,13 @@ font-weight:bold;
 
 .success{background:#2a9d8f;}
 .error{background:#e76f51;}
+
+/* Leaderboard tugmasi */
+.leaderboard-btn {
+    background: #ffd700;
+    color: #111;
+    margin-top: 5px;
+}
 </style>
 </head>
 
@@ -157,6 +163,7 @@ font-weight:bold;
 <button class="primary" onclick="checkAnswer()">✅ Tekshirish</button>
 <button class="secondary" onclick="skipQuestion()">⏭️ Skip</button>
 <button class="danger" onclick="restartGame()">🔄 Restart</button>
+<button class="leaderboard-btn" onclick="showLeaderboard()">🏆 Reyting</button>
 
 </div>
 
@@ -167,6 +174,18 @@ font-weight:bold;
 <div id="finalText"></div>
 <br>
 <button class="primary" onclick="restartGame()">🔄 Qayta o'ynash</button>
+<button class="leaderboard-btn" onclick="showLeaderboard()">🏆 Reytingni ko'rish</button>
+</div>
+</div>
+
+<!-- Leaderboard ekrani -->
+<div id="leaderboardScreen" style="display:none;">
+<div class="gameover">
+<h2>🏆 TOP 10 O'yinchilar</h2>
+<div id="leaderboardList" style="text-align:left; margin:20px 0;">
+Yuklanmoqda...
+</div>
+<button class="primary" onclick="hideLeaderboard()">⬅️ Orqaga</button>
 </div>
 </div>
 
@@ -195,7 +214,7 @@ db = createClient(SUPABASE_URL,SUPABASE_KEY);
 
 /* TELEGRAM BOT */
 const BOT_TOKEN = "8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo";
-const GROUP_ID = "@englishcodebyshaxzod";
+const CHANNEL_ID = "@englishcodebyshaxzod";
 
 /* VERBS */
 const verbs = [
@@ -374,6 +393,87 @@ function updateLives(){
 $("lives").innerText=lives;
 }
 
+/* === LEADERBOARD XABARINI YANGILASH === */
+async function updateLeaderboardMessage() {
+    if (!db) return;
+    
+    try {
+        // TOP 10 o'yinchilarni olish
+        const { data: topPlayers, error } = await db
+            .from("leaderboard")
+            .select("user_name, score")
+            .order("score", { ascending: false })
+            .limit(10);
+        
+        if (error || !topPlayers.length) return;
+        
+        // Leaderboard matnini tayyorlash
+        let message = "🏆 **TOP 10 O'YINCHILAR**\n\n";
+        topPlayers.forEach((player, index) => {
+            const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index+1}.`;
+            message += `${medal} ${player.user_name}: ${player.score} ball\n`;
+        });
+        message += `\n🔄 Yangilandi: ${new Date().toLocaleTimeString('uz-UZ')}`;
+        
+        // Saqlangan xabar ID'sini olish
+        const { data: configData } = await db
+            .from("config")
+            .select("message_id")
+            .eq("key", "leaderboard_msg")
+            .single();
+        
+        if (configData && configData.message_id) {
+            // Xabarni tahrirlash
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    message_id: configData.message_id,
+                    text: message,
+                    parse_mode: "Markdown"
+                })
+            });
+        } else {
+            // Yangi xabar yuborish
+            const response = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    text: message,
+                    parse_mode: "Markdown"
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.ok && result.result) {
+                const messageId = result.result.message_id;
+                
+                // Xabar ID'sini saqlash
+                await db.from("config").upsert({
+                    key: "leaderboard_msg",
+                    message_id: messageId
+                });
+                
+                // Xabarni pin qilish
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        chat_id: CHANNEL_ID,
+                        message_id: messageId,
+                        disable_notification: true
+                    })
+                });
+            }
+        }
+    } catch (e) {
+        console.log("Leaderboard yangilashda xato:", e);
+    }
+}
+
 /* END GAME */
 async function endGame(completed=false){
 
@@ -402,19 +502,67 @@ created_at:new Date().toISOString()
 }catch(e){}
 }
 
-/* SEND TO TELEGRAM GROUP */
+/* LEADERBOARD XABARINI YANGILASH */
+await updateLeaderboardMessage();
+
+/* O'yinchi natijasini kanalga yuborish */
 try{
 fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
 method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
+headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
-chat_id:GROUP_ID,
+chat_id:CHANNEL_ID,
 text:`🎯 ${userName}\n🏆 Score: ${score}\n📚 ${current}/${questions.length}`
 })
 });
 }catch(e){}
+}
+
+/* === LEADERBOARD EKRANI === */
+async function showLeaderboard() {
+    $("gameScreen").style.display = "none";
+    $("gameOverScreen").style.display = "none";
+    $("leaderboardScreen").style.display = "block";
+    
+    const listEl = $("leaderboardList");
+    listEl.innerHTML = "Yuklanmoqda...";
+    
+    if (!db) {
+        listEl.innerHTML = "Ulanish yo'q";
+        return;
+    }
+    
+    try {
+        const { data: topPlayers } = await db
+            .from("leaderboard")
+            .select("user_name, score")
+            .order("score", { ascending: false })
+            .limit(10);
+        
+        if (!topPlayers || topPlayers.length === 0) {
+            listEl.innerHTML = "Hali o'yinchi yo'q";
+            return;
+        }
+        
+        let html = "";
+        topPlayers.forEach((player, index) => {
+            const medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index+1}.`;
+            html += `<div style="padding:10px; background:#333; margin:5px 0; border-radius:10px;">
+                ${medal} ${player.user_name}: <strong>${player.score}</strong> ball
+            </div>`;
+        });
+        
+        listEl.innerHTML = html;
+    } catch (e) {
+        listEl.innerHTML = "Xatolik yuz berdi";
+    }
+}
+
+function hideLeaderboard() {
+    $("leaderboardScreen").style.display = "none";
+    if ($("gameScreen").style.display === "none" && $("gameOverScreen").style.display === "none") {
+        $("gameScreen").style.display = "block";
+    }
 }
 
 /* RESTART */
@@ -427,6 +575,7 @@ $("score").innerText="0";
 $("lives").innerText="3";
 
 $("gameOverScreen").style.display="none";
+$("leaderboardScreen").style.display="none";
 $("gameScreen").style.display="block";
 
 buildQuestions();
