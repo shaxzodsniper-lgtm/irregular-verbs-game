@@ -1,76 +1,35 @@
 <!DOCTYPE html>
 <html lang="uz">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Irregular Verbs Challenge</title>
 
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  background:#111;color:#fff;font-family:Arial,sans-serif;
-  padding:20px;text-align:center;min-height:100vh;
-}
-.container{max-width:500px;margin:auto}
-.header{display:flex;gap:10px;margin-bottom:15px}
-.box{
-  background:#222;padding:12px;border-radius:14px;
-  flex:1;font-size:20px
-}
-.score{color:#2a9d8f}
-.lives{color:#e76f51}
-.progress{
-  background:#222;padding:10px;border-radius:14px;
-  margin-bottom:15px
-}
-.timer{
-  font-size:24px;margin:15px 0;
-  color:#2a9d8f;font-weight:bold
-}
-.verb{
-  font-size:58px;font-weight:bold;
-  color:#2a9d8f;margin-top:10px
-}
-.translation{
-  color:#aaa;margin:10px 0 20px;font-size:18px
-}
-.question{
-  font-size:20px;margin-bottom:12px
-}
-input{
-  width:100%;padding:14px;font-size:18px;
-  border:none;border-radius:14px;
-  margin-bottom:10px;text-align:center
-}
-button{
-  width:100%;padding:14px;font-size:18px;
-  border:none;border-radius:14px;
-  cursor:pointer;font-weight:bold;
-  margin-bottom:10px
-}
-.primary{background:#2a9d8f;color:#fff}
-.secondary{background:#444;color:#fff}
-.danger{background:#e76f51;color:#fff}
-.leaderboard-btn{background:#ffd700;color:#111}
-.gameover{
-  background:#222;padding:25px;
-  border-radius:18px;margin-top:30px
-}
-.final{
-  font-size:55px;color:#2a9d8f;
-  margin:15px 0;font-weight:bold
-}
-.notification{
-  position:fixed;top:20px;left:50%;
-  transform:translateX(-50%);
-  padding:12px 20px;border-radius:40px;
-  z-index:999;font-weight:bold
-}
-.success{background:#2a9d8f}
-.error{background:#e76f51}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#111;color:#fff;font-family:Arial,sans-serif;padding:20px;text-align:center;min-height:100vh;}
+.container{max-width:500px;margin:auto;}
+.header{display:flex;justify-content:space-between;gap:10px;margin-bottom:15px;}
+.box{background:#222;padding:12px;border-radius:14px;flex:1;font-size:20px;}
+.score{color:#2a9d8f;}.lives{color:#e76f51;}
+.progress{background:#222;padding:10px;border-radius:14px;margin-bottom:15px;}
+.timer{font-size:24px;margin:15px 0;color:#2a9d8f;font-weight:bold;}
+.verb{font-size:60px;font-weight:bold;color:#2a9d8f;margin-top:15px;}
+.translation{color:#aaa;margin:10px 0 20px;font-size:18px;}
+.question{font-size:20px;margin-bottom:12px;}
+input{width:100%;padding:14px;font-size:18px;border:none;border-radius:14px;margin-bottom:10px;text-align:center;}
+button{width:100%;padding:14px;font-size:18px;border:none;border-radius:14px;cursor:pointer;font-weight:bold;margin-bottom:10px;}
+.primary{background:#2a9d8f;color:white;}
+.secondary{background:#444;color:white;}
+.danger{background:#e76f51;color:white;}
+.leaderboard-btn{background:#ffd700;color:#111;}
+.gameover{background:#222;padding:25px;border-radius:18px;margin-top:30px;}
+.final{font-size:55px;color:#2a9d8f;margin:15px 0;font-weight:bold;}
+.notification{position:fixed;top:20px;left:50%;transform:translateX(-50%);padding:12px 20px;border-radius:40px;z-index:999;font-weight:bold;}
+.success{background:#2a9d8f;}.error{background:#e76f51;}
 </style>
 </head>
 
@@ -78,452 +37,180 @@ button{
 <div class="container">
 
 <div id="gameScreen">
-  <div class="header">
-    <div class="box score">🏆 <span id="score">0</span></div>
-    <div class="box lives">❤️ <span id="lives">3</span></div>
-  </div>
-
-  <div class="progress" id="progress">1 / 40</div>
-  <div class="timer" id="timer">⏱️ 8s</div>
-
-  <div class="verb" id="verb">go</div>
-  <div class="translation" id="translation">bormoq</div>
-  <div class="question" id="question">V2 shaklini yozing</div>
-
-  <input id="answer" placeholder="Javobingiz..." autofocus />
-
-  <button class="primary" id="checkBtn">✅ Tekshirish</button>
-  <button class="secondary" id="skipBtn">⏭️ Skip</button>
-  <button class="danger" id="restartBtn">🔄 Restart</button>
-  <button class="leaderboard-btn" id="leaderboardBtn">🏆 Reyting</button>
+<div class="header">
+<div class="box score">🏆 <span id="score">0</span></div>
+<div class="box lives">❤️ <span id="lives">3</span></div>
+</div>
+<div class="progress" id="progress">1 / 40</div>
+<div class="timer" id="timer">⏱️ 8s</div>
+<div class="verb" id="verb">go</div>
+<div class="translation" id="translation">bormoq</div>
+<div class="question" id="question">V2 shaklini yozing</div>
+<input id="answer" placeholder="Javobingiz..." autofocus>
+<button class="primary" id="checkBtn">✅ Tekshirish</button>
+<button class="secondary" id="skipBtn">⏭️ Skip</button>
+<button class="danger" id="restartBtn">🔄 Restart</button>
+<button class="leaderboard-btn" id="leaderboardBtn">🏆 Reyting</button>
 </div>
 
-<div id="gameOverScreen" style="display:none">
-  <div class="gameover">
-    <h2>🎯 O'yin tugadi!</h2>
-    <div class="final" id="finalScore">0</div>
-    <div id="finalText"></div>
-    <br>
-    <button class="primary" id="playAgainBtn">🔄 Qayta o'ynash</button>
-    <button class="leaderboard-btn" id="viewLeaderboardBtn">🏆 Reyting</button>
-  </div>
+<div id="gameOverScreen" style="display:none;">
+<div class="gameover">
+<h2>🎯 O'yin tugadi!</h2>
+<div class="final" id="finalScore">0</div>
+<div id="finalText"></div>
+<br>
+<button class="primary" id="playAgainBtn">🔄 Qayta o'ynash</button>
+<button class="leaderboard-btn" id="viewLeaderboardBtn">🏆 Reyting</button>
+</div>
 </div>
 
-<div id="leaderboardScreen" style="display:none">
-  <div class="gameover">
-    <h2>🏆 TOP 10</h2>
-    <div id="leaderboardList" style="text-align:left;margin:20px 0">Yuklanmoqda...</div>
-    <button class="primary" id="backBtn">⬅️ Orqaga</button>
-  </div>
+<div id="leaderboardScreen" style="display:none;">
+<div class="gameover">
+<h2>🏆 TOP 10</h2>
+<div id="leaderboardList" style="text-align:left;margin:20px 0;">Yuklanmoqda...</div>
+<button class="primary" id="backBtn">⬅️ Orqaga</button>
+</div>
 </div>
 
 </div>
 
 <script>
-const tg = window.Telegram?.WebApp || {
-  ready(){},
-  expand(){},
-  initDataUnsafe:{}
-};
-
+const tg = window.Telegram?.WebApp || { ready(){}, expand(){}, initDataUnsafe:{} };
 tg.ready();
 tg.expand();
 
+/* ========== SUPABASE ========== */
 const SUPABASE_URL = "https://vkliiyqxjuhxaafrnyrb.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZrbGlpeXF4anVoeGFhZnJueXJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzkyODYsImV4cCI6MjA5MTcxNTI4Nn0.Jn6xSg8GryDygzB3Y_y99zd1hGJ7ekXZVeNY312GJb8";
-
-const BOT_TOKEN = "8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo";
-const CHANNEL_ID = "@englishcodebyshaxzod";
-const GAME_URL = "https://irregular-verbs-game-alpha.vercel.app";
-
 const { createClient } = window.supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+/* ========== TELEGRAM BOT ========== */
+const BOT_TOKEN = "8687480142:AAGG4HCSSN9QzxRDY3U1hZwp6zPtrbKEWOo";
+const CHANNEL_ID = "@englishcodebyshaxzod";
+const GAME_URL = "https://irregular-verbs-game-alpha.vercel.app"; // <-- O'Z URL'INGIZ
+
+/* ========== FE'LLAR (20 ta) ========== */
 const verbsList = [
-{v1:"go",v2:"went",v3:"gone",t:"bormoq"},
-{v1:"come",v2:"came",v3:"come",t:"kelmoq"},
-{v1:"eat",v2:"ate",v3:"eaten",t:"yemoq"},
-{v1:"write",v2:"wrote",v3:"written",t:"yozmoq"},
-{v1:"see",v2:"saw",v3:"seen",t:"ko'rmoq"},
-{v1:"take",v2:"took",v3:"taken",t:"olmoq"},
-{v1:"give",v2:"gave",v3:"given",t:"bermoq"},
-{v1:"know",v2:"knew",v3:"known",t:"bilmoq"},
-{v1:"speak",v2:"spoke",v3:"spoken",t:"gapirmoq"},
-{v1:"begin",v2:"began",v3:"begun",t:"boshlamoq"},
-{v1:"drink",v2:"drank",v3:"drunk",t:"ichmoq"},
-{v1:"drive",v2:"drove",v3:"driven",t:"haydamoq"},
-{v1:"break",v2:"broke",v3:"broken",t:"sindirmoq"},
-{v1:"buy",v2:"bought",v3:"bought",t:"sotib olmoq"},
-{v1:"bring",v2:"brought",v3:"brought",t:"olib kelmoq"},
-{v1:"teach",v2:"taught",v3:"taught",t:"o'rgatmoq"},
-{v1:"think",v2:"thought",v3:"thought",t:"o'ylamoq"},
-{v1:"find",v2:"found",v3:"found",t:"topmoq"},
-{v1:"fall",v2:"fell",v3:"fallen",t:"yiqilmoq"},
-{v1:"be",v2:"was/were",v3:"been",t:"bo'lmoq"}
+{v1:"go",v2:"went",v3:"gone",t:"bormoq"},{v1:"come",v2:"came",v3:"come",t:"kelmoq"},{v1:"eat",v2:"ate",v3:"eaten",t:"yemoq"},{v1:"write",v2:"wrote",v3:"written",t:"yozmoq"},{v1:"see",v2:"saw",v3:"seen",t:"ko'rmoq"},{v1:"take",v2:"took",v3:"taken",t:"olmoq"},{v1:"give",v2:"gave",v3:"given",t:"bermoq"},{v1:"know",v2:"knew",v3:"known",t:"bilmoq"},{v1:"speak",v2:"spoke",v3:"spoken",t:"gapirmoq"},{v1:"begin",v2:"began",v3:"begun",t:"boshlamoq"},{v1:"drink",v2:"drank",v3:"drunk",t:"ichmoq"},{v1:"drive",v2:"drove",v3:"driven",t:"haydamoq"},{v1:"break",v2:"broke",v3:"broken",t:"sindirmoq"},{v1:"buy",v2:"bought",v3:"bought",t:"sotib olmoq"},{v1:"bring",v2:"brought",v3:"brought",t:"olib kelmoq"},{v1:"teach",v2:"taught",v3:"taught",t:"o'rgatmoq"},{v1:"think",v2:"thought",v3:"thought",t:"o'ylamoq"},{v1:"find",v2:"found",v3:"found",t:"topmoq"},{v1:"fall",v2:"fell",v3:"fallen",t:"yiqilmoq"},{v1:"be",v2:"was/were",v3:"been",t:"bo'lmoq"}
 ];
 
-let userId = "guest";
-let userName = "Player";
+/* ========== GAME VARIABLES ========== */
+let allQuestions = [], questions = [], current = 0, score = 0, lives = 3, time = 8, timer = null, gameActive = true;
+let userName = "Player", userId = "guest";
 
-let allQuestions = [];
-let questions = [];
-let current = 0;
-let score = 0;
-let lives = 3;
-let time = 8;
-let timer = null;
-let gameActive = true;
-
+/* ========== UI YORDAMCHI ========== */
 function $(id){ return document.getElementById(id); }
+function notify(text,type="success"){ const n=document.createElement("div"); n.className="notification "+type; n.innerText=text; document.body.appendChild(n); setTimeout(()=>n.remove(),1800); }
 
-function notify(text,type="success"){
-  const n = document.createElement("div");
-  n.className = "notification " + type;
-  n.innerText = text;
-  document.body.appendChild(n);
-  setTimeout(()=>n.remove(),1800);
-}
-
-function shuffle(arr){
-  for(let i=arr.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [arr[i],arr[j]]=[arr[j],arr[i]];
-  }
-  return arr;
-}
-
-/* USER NAME FIXED */
+/* ========== USER ========== */
 async function loadUserName(){
-  if(tg.initDataUnsafe?.user?.id){
-    const u = tg.initDataUnsafe.user;
-
-    userId = "tg_" + u.id;
-
-    const full =
-      ((u.first_name || "") + " " + (u.last_name || "")).trim();
-
-    userName = full || u.username || "Player";
-  }else{
-    let name = prompt("Ismingizni kiriting:");
-    if(!name || !name.trim()){
-      name = "Guest_" + Math.floor(Math.random()*1000);
+    if(tg.initDataUnsafe && tg.initDataUnsafe.user){
+        const u = tg.initDataUnsafe.user;
+        userId = "tg_" + u.id;
+        const full = ((u.first_name || "") + " " + (u.last_name || "")).trim();
+        userName = full || u.username || "Player";
+    } else {
+        let name = prompt("Ismingizni kiriting:");
+        if(!name || !name.trim()) name = "Guest_" + Math.floor(Math.random()*1000);
+        userName = name.trim();
+        userId = "guest_" + Date.now();
     }
-    userName = name.trim();
-    userId = "guest_" + Date.now();
-  }
 }
 
-function buildQuestions(){
-  allQuestions = [];
-  verbsList.forEach(v=>{
-    allQuestions.push({
-      verb:v.v1, trans:v.t,
-      ask:"V2 shaklini yozing",
-      correct:v.v2
-    });
-    allQuestions.push({
-      verb:v.v1, trans:v.t,
-      ask:"V3 shaklini yozing",
-      correct:v.v3
-    });
-  });
-}
+/* ========== SAVOLLAR ========== */
+function buildQuestions(){ allQuestions = []; verbsList.forEach(v=>{ allQuestions.push({verb:v.v1,trans:v.t,ask:"V2 shaklini yozing",correct:v.v2}); allQuestions.push({verb:v.v1,trans:v.t,ask:"V3 shaklini yozing",correct:v.v3}); }); }
+function shuffleArray(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
-function startTimer(){
-  clearInterval(timer);
-  time = 8;
-  $("timer").innerText = "⏱️ " + time + "s";
-  $("timer").style.color = "#2a9d8f";
+/* ========== TAYMER ========== */
+function startTimer(){ clearInterval(timer); time=8; $("timer").innerText="⏱️ "+time+"s"; $("timer").style.color="#2a9d8f"; timer=setInterval(()=>{ time--; $("timer").innerText="⏱️ "+time+"s"; if(time<=3)$("timer").style.color="#e76f51"; if(time<=0){ clearInterval(timer); if(!gameActive)return; lives--; updateLives(); notify("⏰ Vaqt tugadi!","error"); if(lives<=0)endGame(); else{current++;loadQuestion();} } },1000); }
+function updateLives(){ $("lives").innerText=lives; }
 
-  timer = setInterval(()=>{
-    time--;
-    $("timer").innerText = "⏱️ " + time + "s";
+/* ========== SAVOL ========== */
+function loadQuestion(){ if(!gameActive)return; if(current>=questions.length){endGame(true);return;} const q=questions[current]; $("verb").innerText=q.verb; $("translation").innerText=q.trans; $("question").innerText=q.ask; $("progress").innerText=(current+1)+" / "+questions.length; $("answer").value=""; $("answer").focus(); startTimer(); }
 
-    if(time <= 3) $("timer").style.color = "#e76f51";
+/* ========== JAVOB ========== */
+function checkAnswer(){ if(!gameActive)return; const q=questions[current]; const ans=$("answer").value.trim().toLowerCase(); const valid=q.correct.toLowerCase().split('/'); clearInterval(timer); if(valid.includes(ans)){ score++; score+=Math.floor(time/2); $("score").innerText=score; notify("✅ To'g'ri"); } else { lives--; updateLives(); notify("❌ "+q.correct,"error"); } if(lives<=0){ endGame(); return; } current++; loadQuestion(); }
+function skipQuestion(){ if(!gameActive)return; clearInterval(timer); lives--; updateLives(); notify("⏭️ Skip","error"); if(lives<=0){ endGame(); return; } current++; loadQuestion(); }
 
-    if(time <= 0){
-      clearInterval(timer);
-      lives--;
-      updateLives();
-      notify("⏰ Vaqt tugadi","error");
-
-      if(lives <= 0) endGame();
-      else{
-        current++;
-        loadQuestion();
-      }
-    }
-  },1000);
-}
-
-function updateLives(){
-  $("lives").innerText = lives;
-}
-
-function loadQuestion(){
-  if(current >= questions.length){
-    endGame(true);
-    return;
-  }
-
-  const q = questions[current];
-
-  $("verb").innerText = q.verb;
-  $("translation").innerText = q.trans;
-  $("question").innerText = q.ask;
-  $("progress").innerText = (current+1)+" / "+questions.length;
-  $("answer").value = "";
-  $("answer").focus();
-
-  startTimer();
-}
-
-function checkAnswer(){
-  const q = questions[current];
-  const ans = $("answer").value.trim().toLowerCase();
-  const valid = q.correct.toLowerCase().split("/");
-
-  clearInterval(timer);
-
-  if(valid.includes(ans)){
-    score++;
-    score += Math.floor(time/2);
-    $("score").innerText = score;
-    notify("✅ To'g'ri");
-  }else{
-    lives--;
-    updateLives();
-    notify("❌ " + q.correct,"error");
-  }
-
-  if(lives <= 0){
-    endGame();
-    return;
-  }
-
-  current++;
-  loadQuestion();
-}
-
-function skipQuestion(){
-  clearInterval(timer);
-  lives--;
-  updateLives();
-
-  if(lives <= 0){
-    endGame();
-    return;
-  }
-
-  current++;
-  loadQuestion();
+/* ========== LEADERBOARD YORDAMCHI ========== */
+async function getTop10(){
+    const { data } = await db.from("leaderboard").select("user_name, user_id, score").order("score", { ascending: false });
+    if(!data || data.length===0) return [];
+    const bestScores = new Map();
+    for(let p of data){ if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score) bestScores.set(p.user_id, { user_name: p.user_name, score: p.score }); }
+    return Array.from(bestScores.values()).sort((a,b)=>b.score-a.score).slice(0,10);
 }
 
 async function saveBestScore(){
-  const { data: old } = await db
-    .from("leaderboard")
-    .select("score")
-    .eq("user_id",userId)
-    .maybeSingle();
-
-  if(!old){
-    await db.from("leaderboard").insert({
-      user_id:userId,
-      user_name:userName,
-      score:score
-    });
-    return score;
-  }
-
-  if(score > old.score){
-    await db.from("leaderboard")
-      .update({
-        user_name:userName,
-        score:score
-      })
-      .eq("user_id",userId);
-
-    return score;
-  }
-
-  return old.score;
+    const { data: old } = await db.from("leaderboard").select("score").eq("user_id",userId).order("score",{ascending:false}).limit(1);
+    const prevBest = (old && old.length>0) ? old[0].score : 0;
+    await db.from("leaderboard").insert({ user_id:userId, user_name:userName, score:score, created_at:new Date().toISOString() });
+    return Math.max(score, prevBest);
 }
 
-async function getTop10(){
-  const { data } = await db
-    .from("leaderboard")
-    .select("user_name,score")
-    .order("score",{ascending:false})
-    .limit(10);
-
-  return data || [];
-}
-
-/* EDIT MESSAGE FIXED */
+/* ========== TELEGRAM XABAR YANGILASH ========== */
 async function updateTelegramLeaderboard(){
-  const top = await getTop10();
-
-  let text = "🏆 TOP 10 O'YINCHILAR\n\n";
-
-  top.forEach((p,i)=>{
-    const medal =
-      i===0 ? "🥇" :
-      i===1 ? "🥈" :
-      i===2 ? "🥉" : (i+1)+".";
-
-    text += `${medal} ${p.user_name} - ${p.score}\n`;
-  });
-
-  text += "\n🎮 Pastdagi tugma orqali o'ynang!";
-
-  const keyboard = {
-    inline_keyboard:[
-      [{text:"🎮 O'yinni boshlash",url:GAME_URL}]
-    ]
-  };
-
-  const { data: cfg } = await db
-    .from("config")
-    .select("*")
-    .eq("key","leaderboard_msg")
-    .maybeSingle();
-
-  if(!cfg || !cfg.value){
-
-    const res = await fetch(
-      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-      {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          chat_id:CHANNEL_ID,
-          text:text,
-          reply_markup:keyboard
-        })
-      }
-    );
-
+    const top = await getTop10();
+    if(top.length===0) return;
+    
+    let text = "🏆 TOP 10 O'YINCHILAR\n\n";
+    top.forEach((p,i)=>{ const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)+"."; text += `${medal} ${p.user_name}: ${p.score} ball\n`; });
+    text += "\n🎮 Pastdagi tugma orqali o'ynang!";
+    
+    const keyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
+    const { data: cfg } = await db.from("config").select("message_id").eq("key","leaderboard_msg").maybeSingle();
+    
+    if(!cfg || !cfg.message_id){
+        const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:CHANNEL_ID, text:text, reply_markup:keyboard }) });
+        const json = await res.json();
+        if(json.ok && json.result){
+            await db.from("config").upsert({ key:"leaderboard_msg", message_id: json.result.message_id });
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:CHANNEL_ID, message_id:json.result.message_id, disable_notification:true }) });
+        }
+        return;
+    }
+    
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:CHANNEL_ID, message_id:cfg.message_id, text:text, reply_markup:keyboard }) });
     const json = await res.json();
-
-    if(json.ok){
-      await db.from("config").upsert({
-        key:"leaderboard_msg",
-        value:String(json.result.message_id)
-      });
+    if(!json.ok){
+        const resend = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{ method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({ chat_id:CHANNEL_ID, text:text, reply_markup:keyboard }) });
+        const resendJson = await resend.json();
+        if(resendJson.ok && resendJson.result) await db.from("config").upsert({ key:"leaderboard_msg", message_id: resendJson.result.message_id });
     }
-
-    return;
-  }
-
-  const res = await fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,
-    {
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        chat_id:CHANNEL_ID,
-        message_id:Number(cfg.value),
-        text:text,
-        reply_markup:keyboard
-      })
-    }
-  );
-
-  const json = await res.json();
-
-  if(!json.ok){
-    const resend = await fetch(
-      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-      {
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body:JSON.stringify({
-          chat_id:CHANNEL_ID,
-          text:text,
-          reply_markup:keyboard
-        })
-      }
-    );
-
-    const resendJson = await resend.json();
-
-    if(resendJson.ok){
-      await db.from("config").upsert({
-        key:"leaderboard_msg",
-        value:String(resendJson.result.message_id)
-      });
-    }
-  }
 }
 
-async function endGame(done=false){
-  clearInterval(timer);
-  gameActive = false;
-
-  $("gameScreen").style.display = "none";
-  $("gameOverScreen").style.display = "block";
-  $("finalScore").innerText = score;
-
-  const best = await saveBestScore();
-
-  $("finalText").innerText =
-    done
-    ? `🎉 Tugatdingiz!\nBest score: ${best}`
-    : `📊 Best score: ${best}`;
-
-  await updateTelegramLeaderboard();
+/* ========== O'YIN TUGADI ========== */
+async function endGame(completed=false){
+    clearInterval(timer); gameActive=false;
+    $("gameScreen").style.display="none"; $("gameOverScreen").style.display="block";
+    $("finalScore").innerText=score;
+    const best = await saveBestScore();
+    $("finalText").innerText = completed ? `🎉 Tugatdingiz!\nEng yaxshi: ${best}` : `📊 Eng yaxshi: ${best}`;
+    await updateTelegramLeaderboard();
 }
 
+/* ========== REYTING EKRANI ========== */
 async function showLeaderboard(){
-  $("gameScreen").style.display="none";
-  $("gameOverScreen").style.display="none";
-  $("leaderboardScreen").style.display="block";
+    $("gameScreen").style.display="none"; $("gameOverScreen").style.display="none"; $("leaderboardScreen").style.display="block";
+    const top = await getTop10();
+    let html = "";
+    top.forEach((p,i)=>{ const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1)+"."; html += `<div style="padding:12px;background:#333;margin:6px 0;border-radius:12px"><strong>${medal}</strong> ${p.user_name}: ${p.score} ball</div>`; });
+    $("leaderboardList").innerHTML = html || "Hali o'yinchi yo'q";
+}
+function hideLeaderboard(){ $("leaderboardScreen").style.display="none"; if(gameActive)$("gameScreen").style.display="block"; else $("gameOverScreen").style.display="block"; }
 
-  const top = await getTop10();
-
-  let html = "";
-
-  top.forEach((p,i)=>{
-    const medal =
-      i===0 ? "🥇" :
-      i===1 ? "🥈" :
-      i===2 ? "🥉" : (i+1)+".";
-
-    html += `
-    <div style="padding:12px;background:#333;margin:6px 0;border-radius:12px">
-      <strong>${medal}</strong> ${p.user_name} - ${p.score}
-    </div>`;
-  });
-
-  $("leaderboardList").innerHTML = html || "Hali o'yinchi yo'q";
+/* ========== RESTART ========== */
+async function restartGame(){
+    clearInterval(timer); score=0; lives=3; current=0; gameActive=true;
+    $("score").innerText="0"; $("lives").innerText="3";
+    $("gameOverScreen").style.display="none"; $("leaderboardScreen").style.display="none"; $("gameScreen").style.display="block";
+    buildQuestions(); questions=shuffleArray([...allQuestions]);
+    await loadUserName();
+    loadQuestion();
 }
 
-function hideLeaderboard(){
-  $("leaderboardScreen").style.display="none";
-  if(gameActive) $("gameScreen").style.display="block";
-  else $("gameOverScreen").style.display="block";
-}
-
-function restartGame(){
-  clearInterval(timer);
-
-  score=0;
-  lives=3;
-  current=0;
-  gameActive=true;
-
-  $("score").innerText="0";
-  $("lives").innerText="3";
-
-  $("gameOverScreen").style.display="none";
-  $("leaderboardScreen").style.display="none";
-  $("gameScreen").style.display="block";
-
-  buildQuestions();
-  questions = shuffle([...allQuestions]);
-  loadQuestion();
-}
-
+/* ========== EVENTLAR ========== */
 $("checkBtn").onclick = checkAnswer;
 $("skipBtn").onclick = skipQuestion;
 $("restartBtn").onclick = restartGame;
@@ -531,16 +218,14 @@ $("leaderboardBtn").onclick = showLeaderboard;
 $("playAgainBtn").onclick = restartGame;
 $("viewLeaderboardBtn").onclick = showLeaderboard;
 $("backBtn").onclick = hideLeaderboard;
+$("answer").addEventListener("keypress",e=>{ if(e.key==="Enter") checkAnswer(); });
 
-$("answer").addEventListener("keypress",(e)=>{
-  if(e.key==="Enter") checkAnswer();
-});
-
+/* ========== START ========== */
 (async function(){
-  await loadUserName();
-  buildQuestions();
-  questions = shuffle([...allQuestions]);
-  loadQuestion();
+    await loadUserName();
+    buildQuestions();
+    questions = shuffleArray([...allQuestions]);
+    loadQuestion();
 })();
 </script>
 </body>
