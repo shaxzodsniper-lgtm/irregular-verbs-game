@@ -248,47 +248,37 @@ async function getTop10(){
 
 /* ========== NATIJANI SAQLASH (BEST SCORE) ========== */
 async function saveScore(){
-    if(!userId || !userName) return 0;
+  if(!db) return score;
 
-    try{
-        const { data: old, error: readError } = await db
-            .from("leaderboard")
-            .select("user_id,user_name,score")
-            .eq("user_id", userId)
-            .maybeSingle();
+  try{
+    const { data: old, error } = await db
+      .from("leaderboard")
+      .select("score")
+      .eq("user_id", userId)
+      .maybeSingle();
 
-        if(readError) console.log(readError);
+    const oldScore = old ? Number(old.score) : 0;
 
-        /* foydalanuvchi yo'q bo'lsa */
-        if(!old){
-            await db.from("leaderboard").insert({
-                user_id: userId,
-                user_name: userName,
-                score: score
-            });
-            return score;
-        }
+    if(score > oldScore){
+      const { error: upsertError } = await db
+        .from("leaderboard")
+        .upsert({
+          user_id: userId,
+          user_name: userName,
+          score: score,
+          updated_at: new Date().toISOString()
+        });
 
-        /* faqat yangi score katta bo'lsa update */
-        if(score > old.score){
-            await db
-                .from("leaderboard")
-                .update({
-                    user_name: userName,
-                    score: score
-                })
-                .eq("user_id", userId);
-
-            return score;
-        }
-
-        /* eski best qaytadi */
-        return old.score;
-
-    }catch(err){
-        console.log("saveScore error:", err);
-        return score;
+      if(upsertError) console.log(upsertError);
+      return score;
     }
+
+    return oldScore;
+
+  }catch(err){
+    console.log(err);
+    return score;
+  }
 }
 
 /* ========== TELEGRAM XABARINI YANGILASH ========== */
