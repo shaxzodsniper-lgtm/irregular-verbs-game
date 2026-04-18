@@ -107,20 +107,20 @@ function notify(text,type="success"){ const n=document.createElement("div"); n.c
 async function loadUserName(){
     const savedName = localStorage.getItem('verbGame_playerName');
     const savedId = localStorage.getItem('verbGame_userId');
-    
+
     if(savedName && savedId){
         userName = savedName;
         userId = savedId;
         return;
     }
-    
+
     if(tg.initDataUnsafe && tg.initDataUnsafe.user){
         const u = tg.initDataUnsafe.user;
         userId = "tg_" + u.id;
         const full = ((u.first_name || "") + " " + (u.last_name || "")).trim();
         userName = full || u.username || "";
     }
-    
+
     if(!userName || userName === "Player" || userName === ""){
         let name = prompt("🏆 Reytingda ko'rinishi uchun ismingizni kiriting:", "");
         if(!name || !name.trim()){
@@ -129,232 +129,294 @@ async function loadUserName(){
         }
         userName = name.trim();
     }
-    
+
     if(!userId){
         userId = "guest_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
     }
-    
+
     localStorage.setItem('verbGame_playerName', userName);
     localStorage.setItem('verbGame_userId', userId);
 }
 
 /* ========== SAVOLLAR ========== */
-function buildQuestions(){ 
-    allQuestions = []; 
-    verbsList.forEach(v=>{ 
-        allQuestions.push({verb:v.v1, trans:v.t, ask:"V2 shaklini yozing", correct:v.v2}); 
-        allQuestions.push({verb:v.v1, trans:v.t, ask:"V3 shaklini yozing", correct:v.v3}); 
-    }); 
+function buildQuestions(){
+    allQuestions = [];
+    verbsList.forEach(v=>{
+        allQuestions.push({verb:v.v1, trans:v.t, ask:"V2 shaklini yozing", correct:v.v2});
+        allQuestions.push({verb:v.v1, trans:v.t, ask:"V3 shaklini yozing", correct:v.v3});
+    });
 }
 function shuffleArray(arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
 
 /* ========== TAYMER ========== */
-function startTimer(){ 
-    clearInterval(timer); 
-    time=8; 
-    $("timer").innerText="⏱️ "+time+"s"; 
-    $("timer").style.color="#2a9d8f"; 
-    timer=setInterval(()=>{ 
-        time--; 
-        $("timer").innerText="⏱️ "+time+"s"; 
-        if(time<=3) $("timer").style.color="#e76f51"; 
-        if(time<=0){ 
-            clearInterval(timer); 
-            if(!gameActive) return; 
-            lives--; 
-            updateLives(); 
-            notify("⏰ Vaqt tugadi!","error"); 
-            if(lives<=0) endGame(); 
-            else{ current++; loadQuestion(); } 
-        } 
-    },1000); 
+function startTimer(){
+    clearInterval(timer);
+    time=8;
+    $("timer").innerText="⏱️ "+time+"s";
+    $("timer").style.color="#2a9d8f";
+    timer=setInterval(()=>{
+        time--;
+        $("timer").innerText="⏱️ "+time+"s";
+        if(time<=3) $("timer").style.color="#e76f51";
+        if(time<=0){
+            clearInterval(timer);
+            if(!gameActive) return;
+            lives--;
+            updateLives();
+            notify("⏰ Vaqt tugadi!","error");
+            if(lives<=0) endGame();
+            else{ current++; loadQuestion(); }
+        }
+    },1000);
 }
 function updateLives(){ $("lives").innerText=lives; }
 
 /* ========== SAVOL YUKLASH ========== */
-function loadQuestion(){ 
-    if(!gameActive) return; 
-    if(current >= questions.length){ endGame(true); return; } 
-    const q = questions[current]; 
-    $("verb").innerText = q.verb; 
-    $("translation").innerText = q.trans; 
-    $("question").innerText = q.ask; 
-    $("progress").innerText = (current+1) + " / " + questions.length; 
-    $("answer").value = ""; 
-    $("answer").focus(); 
-    startTimer(); 
+function loadQuestion(){
+    if(!gameActive) return;
+    if(current >= questions.length){ endGame(true); return; }
+    const q = questions[current];
+    $("verb").innerText = q.verb;
+    $("translation").innerText = q.trans;
+    $("question").innerText = q.ask;
+    $("progress").innerText = (current+1) + " / " + questions.length;
+    $("answer").value = "";
+    $("answer").focus();
+    startTimer();
 }
 
 /* ========== JAVOBNI TEKSHIRISH ========== */
-function checkAnswer(){ 
-    if(!gameActive) return; 
-    const q = questions[current]; 
-    const ans = $("answer").value.trim().toLowerCase(); 
-    const valid = q.correct.toLowerCase().split('/'); 
-    clearInterval(timer); 
-    if(valid.includes(ans)){ 
-        score++; 
-        score += Math.floor(time/2); 
-        $("score").innerText = score; 
-        notify("✅ To'g'ri"); 
-    } else { 
-        lives--; 
-        updateLives(); 
-        notify("❌ " + q.correct, "error"); 
-    } 
-    if(lives <= 0){ 
-        endGame(); 
-        return; 
-    } 
-    current++; 
-    loadQuestion(); 
+function checkAnswer(){
+    if(!gameActive) return;
+    const q = questions[current];
+    const ans = $("answer").value.trim().toLowerCase();
+    const valid = q.correct.toLowerCase().split('/');
+    clearInterval(timer);
+    if(valid.includes(ans)){
+        score++;
+        score += Math.floor(time/2);
+        $("score").innerText = score;
+        notify("✅ To'g'ri");
+    } else {
+        lives--;
+        updateLives();
+        notify("❌ " + q.correct, "error");
+    }
+    if(lives <= 0){
+        endGame();
+        return;
+    }
+    current++;
+    loadQuestion();
 }
 
-function skipQuestion(){ 
-    if(!gameActive) return; 
-    clearInterval(timer); 
-    lives--; 
-    updateLives(); 
-    notify("⏭️ Skip", "error"); 
-    if(lives <= 0){ 
-        endGame(); 
-        return; 
-    } 
-    current++; 
-    loadQuestion(); 
+function skipQuestion(){
+    if(!gameActive) return;
+    clearInterval(timer);
+    lives--;
+    updateLives();
+    notify("⏭️ Skip", "error");
+    if(lives <= 0){
+        endGame();
+        return;
+    }
+    current++;
+    loadQuestion();
 }
 
 /* ========== LEADERBOARD: TOP 10 ========== */
 async function getTop10(){
-    const { data } = await db
-        .from("leaderboard")
-        .select("user_name, user_id, score")
-        .order("score", { ascending: false });
-    
-    if(!data || data.length === 0) return [];
-    
-    const bestScores = new Map();
-    for(let p of data){
-        if(!bestScores.has(p.user_id) || p.score > bestScores.get(p.user_id).score){
-            bestScores.set(p.user_id, { user_name: p.user_name, score: p.score });
+    try{
+        const { data, error } = await db
+            .from("leaderboard")
+            .select("user_name,score")
+            .order("score", { ascending:false })
+            .limit(10);
+
+        if(error){
+            console.log(error);
+            return [];
         }
+
+        return data || [];
+
+    }catch(err){
+        console.log("getTop10 error:", err);
+        return [];
     }
-    
-    return Array.from(bestScores.values())
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 10);
 }
 
 /* ========== NATIJANI SAQLASH (BEST SCORE) ========== */
 async function saveScore(){
     if(!userId || !userName) return 0;
-    
-    // Avvalgi eng yaxshi ballni olish
-    const { data: oldData } = await db
-        .from("leaderboard")
-        .select("score")
-        .eq("user_id", userId)
-        .maybeSingle();
-    
-    const prevBest = oldData ? oldData.score : 0;
-    
-    // Yangi ball yuqori bo'lsa yoki birinchi marta bo'lsa
-    if(score > prevBest){
-        const { error } = await db
+
+    try{
+        const { data: old, error: readError } = await db
             .from("leaderboard")
-            .upsert({ 
-                user_id: userId, 
-                user_name: userName, 
-                score: score,
-                updated_at: new Date().toISOString() 
-            }, { onConflict: 'user_id' });
-        
-        if(error) console.log("Upsert xatosi:", error);
+            .select("user_id,user_name,score")
+            .eq("user_id", userId)
+            .maybeSingle();
+
+        if(readError) console.log(readError);
+
+        /* foydalanuvchi yo'q bo'lsa */
+        if(!old){
+            await db.from("leaderboard").insert({
+                user_id: userId,
+                user_name: userName,
+                score: score
+            });
+            return score;
+        }
+
+        /* faqat yangi score katta bo'lsa update */
+        if(score > old.score){
+            await db
+                .from("leaderboard")
+                .update({
+                    user_name: userName,
+                    score: score
+                })
+                .eq("user_id", userId);
+
+            return score;
+        }
+
+        /* eski best qaytadi */
+        return old.score;
+
+    }catch(err){
+        console.log("saveScore error:", err);
         return score;
     }
-    
-    return prevBest;
 }
 
 /* ========== TELEGRAM XABARINI YANGILASH ========== */
 async function updateTelegramLeaderboard(){
-    const top = await getTop10();
-    if(top.length === 0) return;
-    
-    let text = "🏆 TOP 10 O'YINCHILAR\n\n";
-    top.forEach((p, i) => {
-        const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : (i+1) + ".";
-        text += `${medal} ${p.user_name}: ${p.score} ball\n`;
-    });
-    text += "\n🎮 Pastdagi tugma orqali o'ynang!";
-    
-    const keyboard = { inline_keyboard: [[{ text: "🎮 O'yinni boshlash", url: GAME_URL }]] };
-    
     try{
-        // Config'dan message_id ni olish
-        const { data: cfg } = await db
+        const top = await getTop10();
+        if(top.length === 0) return;
+
+        let text = "🏆 TOP 10 O'YINCHILAR\n\n";
+
+        top.forEach((p,i)=>{
+            const medal =
+                i===0 ? "🥇" :
+                i===1 ? "🥈" :
+                i===2 ? "🥉" :
+                (i+1) + ".";
+
+            text += `${medal} ${p.user_name} - ${p.score}\n`;
+        });
+
+        text += "\n🎮 Pastdagi tugma orqali o'ynang!";
+
+        const keyboard = {
+            inline_keyboard:[
+                [{ text:"🎮 O'yinni boshlash", url:GAME_URL }]
+            ]
+        };
+
+        /* config dan value ni o'qiymiz */
+        const { data: cfg, error } = await db
             .from("config")
-            .select("message_id")
-            .eq("key", "leaderboard_msg")
+            .select("value")
+            .eq("key","leaderboard_msg")
             .maybeSingle();
-        
-        if(cfg && cfg.message_id){
-            // Xabarni tahrirlash
-            const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ 
-                    chat_id: CHANNEL_ID, 
-                    message_id: cfg.message_id, 
-                    text: text, 
-                    reply_markup: keyboard 
-                })
-            });
+
+        if(error) console.log(error);
+
+        /* message_id mavjud bo'lsa edit qilamiz */
+        if(cfg && cfg.value){
+
+            const res = await fetch(
+                `https://api.telegram.org/bot${BOT_TOKEN}/editMessageText`,
+                {
+                    method:"POST",
+                    headers:{ "Content-Type":"application/json" },
+                    body:JSON.stringify({
+                        chat_id: CHANNEL_ID,
+                        message_id: Number(cfg.value),
+                        text: text,
+                        reply_markup: keyboard
+                    })
+                }
+            );
+
             const json = await res.json();
-            
-            // Agar xato bo'lsa (masalan xabar o'chirilgan)
-            if(!json.ok){
-                console.log("Edit xatosi, yangi xabar yaratilmoqda...");
+
+            /* agar "message is not modified" bo'lsa normal holat */
+            if(json.ok) return;
+
+            if(json.description &&
+               json.description.includes("message is not modified")){
+                return;
+            }
+
+            /* faqat message topilmasa yangi yaratamiz */
+            if(json.description &&
+               (
+                 json.description.includes("message to edit not found") ||
+                 json.description.includes("MESSAGE_ID_INVALID")
+               )){
                 await createNewMessage(text, keyboard);
             }
-        } else {
-            await createNewMessage(text, keyboard);
+
+            return;
         }
-    } catch(e){
-        console.log("Leaderboard xatosi:", e);
+
+        /* config bo'sh bo'lsa 1 marta yaratadi */
         await createNewMessage(text, keyboard);
+
+    }catch(err){
+        console.log("updateTelegramLeaderboard error:", err);
     }
 }
 
 async function createNewMessage(text, keyboard){
-    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-            chat_id: CHANNEL_ID, 
-            text: text, 
-            reply_markup: keyboard 
-        })
-    });
-    const json = await res.json();
-    
-    if(json.ok && json.result){
-        // Yangi message_id ni saqlash
-        await db.from("config").upsert({ 
-            key: "leaderboard_msg", 
-            message_id: json.result.message_id 
-        });
-        
-        // Pin qilish
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ 
-                chat_id: CHANNEL_ID, 
-                message_id: json.result.message_id, 
-                disable_notification: true 
-            })
-        });
+    try{
+        const res = await fetch(
+            `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+            {
+                method:"POST",
+                headers:{ "Content-Type":"application/json" },
+                body:JSON.stringify({
+                    chat_id: CHANNEL_ID,
+                    text: text,
+                    reply_markup: keyboard
+                })
+            }
+        );
+
+        const json = await res.json();
+
+        if(json.ok && json.result){
+
+            const msgId = String(json.result.message_id);
+
+            /* value ustuniga saqlaymiz */
+            await db.from("config").upsert({
+                key: "leaderboard_msg",
+                value: msgId
+            });
+
+            /* pin */
+            await fetch(
+                `https://api.telegram.org/bot${BOT_TOKEN}/pinChatMessage`,
+                {
+                    method:"POST",
+                    headers:{ "Content-Type":"application/json" },
+                    body:JSON.stringify({
+                        chat_id: CHANNEL_ID,
+                        message_id: Number(msgId),
+                        disable_notification: true
+                    })
+                }
+            );
+        }
+
+    }catch(err){
+        console.log("createNewMessage error:", err);
     }
 }
 
@@ -362,16 +424,16 @@ async function createNewMessage(text, keyboard){
 async function endGame(completed = false){
     clearInterval(timer);
     gameActive = false;
-    
+
     $("gameScreen").style.display = "none";
     $("gameOverScreen").style.display = "block";
     $("finalScore").innerText = score;
-    
+
     const best = await saveScore();
-    $("finalText").innerText = completed 
-        ? `🎉 Tugatdingiz!\n🏆 Eng yaxshi: ${best}` 
+    $("finalText").innerText = completed
+        ? `🎉 Tugatdingiz!\n🏆 Eng yaxshi: ${best}`
         : `📊 Bu safar: ${score}\n🏆 Eng yaxshi: ${best}`;
-    
+
     await updateTelegramLeaderboard();
 }
 
@@ -380,7 +442,7 @@ async function showLeaderboard(){
     $("gameScreen").style.display = "none";
     $("gameOverScreen").style.display = "none";
     $("leaderboardScreen").style.display = "block";
-    
+
     const top = await getTop10();
     let html = "";
     top.forEach((p, i) => {
@@ -405,7 +467,7 @@ async function restartGame(){
     $("gameOverScreen").style.display = "none";
     $("leaderboardScreen").style.display = "none";
     $("gameScreen").style.display = "block";
-    
+
     buildQuestions();
     questions = shuffleArray([...allQuestions]);
     loadQuestion();
